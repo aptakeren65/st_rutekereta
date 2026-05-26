@@ -182,7 +182,7 @@ with tab1:
                     st.error("Jalur tidak terhubung.")
                 else:
                     st.balloons()
-                    st.success(f"🎉Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
+                    st.success(f"Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
                     st.info(" ➔ ".join([f"**{s}**" for s in path]))
 
 # ==================== MENU 2: JARINGAN REL ====================
