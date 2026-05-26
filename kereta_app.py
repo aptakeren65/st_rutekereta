@@ -69,7 +69,7 @@ st.markdown(
 )
 
 st.title("🚇 Train Route Planner ")
-st.write("Navigasi Jalur Kereta Api Indonesia dengan **Algoritma Dijkstra**")
+st.write("Navigasi Jalur Kereta Api Indonesia ")
 st.markdown("---")
 
 
