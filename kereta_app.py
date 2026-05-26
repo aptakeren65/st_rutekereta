@@ -133,7 +133,7 @@ graph = st.session_state.graph_kereta
 
 # --- 4. PEMBUATAN 5 MENU UTAMA (TABS) ---
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📍 Cari Rute", "🗺️ Jaringan Rel", "⚙️ Kelola Rute", "📊 Statistik"
+    "📍 Cari Rute", "🗺️ Jaringan Rel", "⚙️ Kendali Rute", "📊 Statistik"
 ])
 
 # ==================== MENU 1: CARI RUTE ====================
@@ -198,7 +198,7 @@ with tab2:
         target_col = col_a if i % 2 == 0 else col_b
         target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km)")
 
-# ==================== MENU 3: KELOLA RUTE ====================
+# ==================== MENU 3: KENDALI RUTE ====================
 with tab3:
     st.subheader("⚙️ Pusat Kendali Data ")
     c1, c2, c3 = st.columns(3)
