@@ -2,7 +2,7 @@ import heapq
 import streamlit as st
 
 # --- 1. PENGATURAN HALAMAN & TEMA WARNA PINK (CSS INJECTION) ---
-st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta - Pink Edition")
+st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
 
 # Injeksi CSS Custom untuk Tema Pink
 st.markdown(
