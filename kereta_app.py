@@ -1,10 +1,75 @@
 import heapq
 import streamlit as st
 
-# --- 1. PENGATURAN HALAMAN UTAMA ---
-st.set_page_config(layout="wide", page_title="Sistem Navigasi Rute Kereta")
-st.title("🚇 Aplikasi Pencari Rute Terpendek Kereta Api")
-st.write("Implementasi Struktur Data **Graph (Adjacency List)** dan **Algoritma Dijkstra**")
+# --- 1. PENGATURAN HALAMAN & TEMA WARNA PINK (CSS INJECTION) ---
+st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta - Pink Edition")
+
+# Injeksi CSS Custom untuk Tema Pink
+st.markdown(
+    """
+    <style>
+    /* 1. Latar Belakang Halaman Utama (Soft Pink) */
+    .stApp {
+        background-color: #fff0f6;
+    }
+    
+    /* 2. Warna Judul dan Teks Utama (Deep Pink / Rose) */
+    h1, h2, h3, h4 {
+        color: #d63384 !important;
+    }
+    
+    p, b, span {
+        color: #495057;
+    }
+
+    /* 3. Desain Kartu pada Tabs (White with Pink Border) */
+    .stTabs [data-baseweb="tab-panel"] {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 20px;
+        border: 2px solid #fcc2d7;
+        box-shadow: 0 10px 15px rgba(214, 51, 132, 0.05);
+        margin-top: 15px;
+    }
+
+    /* 4. Styling Tab Menu agar berwarna Pink saat aktif */
+    button[data-baseweb="tab"] {
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    button[aria-selected="true"] {
+        color: #d63384 !important;
+        border-bottom-color: #d63384 !important;
+    }
+
+    /* 5. Custom Button (Pink Gradient) */
+    .stButton>button {
+        background-color: #ff85a1;
+        color: white !important;
+        border-radius: 12px;
+        border: none;
+        transition: 0.3s;
+    }
+    
+    .stButton>button:hover {
+        background-color: #d63384;
+        border: none;
+        color: white !important;
+    }
+    
+    /* 6. Info & Success Box Custom Color */
+    .stAlert {
+        border-radius: 15px;
+        border: 1px solid #fcc2d7;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.title("💖 Train Route Planner: Pink Edition")
+st.write("Navigasi Jalur Kereta Api Indonesia dengan **Algoritma Dijkstra**")
 st.markdown("---")
 
 
@@ -15,7 +80,7 @@ class GraphKereta:
         self.nodes = set()
         self.edges = {}
 
-    # [C]REATE: Menambahkan Stasiun & Rute Baru
+    # [C]REATE
     def tambah_stasiun(self, nama_stasiun):
         nama_stasiun = nama_stasiun.strip()
         if nama_stasiun:
@@ -29,19 +94,18 @@ class GraphKereta:
         if asal and tujuan and asal != tujuan:
             self.tambah_stasiun(asal)
             self.tambah_stasiun(tujuan)
-            # Mencegah duplikasi rute yang persis sama
             if not any(node == tujuan for node, _ in self.edges[asal]):
                 self.edges[asal].append((tujuan, jarak_km))
                 self.edges[tujuan].append((asal, jarak_km))
 
-    # [U]PDATE: Memperbarui Jarak/Bobot Rute yang Sudah Ada
+    # [U]PDATE
     def update_jarak_rute(self, asal, tujuan, jarak_baru):
         if asal in self.edges:
             self.edges[asal] = [(node, jarak_baru) if node == tujuan else (node, j) for node, j in self.edges[asal]]
         if tujuan in self.edges:
             self.edges[tujuan] = [(node, jarak_baru) if node == asal else (node, j) for node, j in self.edges[tujuan]]
 
-    # [D]ELETE: Menghapus Rute dari Jaringan Graph
+    # [D]ELETE
     def hapus_rute(self, asal, tujuan):
         if asal in self.edges:
             self.edges[asal] = [item for item in self.edges[asal] if item[0] != tujuan]
@@ -49,39 +113,17 @@ class GraphKereta:
             self.edges[tujuan] = [item for item in self.edges[tujuan] if item[0] != asal]
 
 
-# --- 3. DATA DEFAULT (SESSION STATE) ---
+# --- 3. DATA DEFAULT (SIMULASI JALUR INDONESIA) ---
 if "graph_kereta" not in st.session_state:
     geo_graph = GraphKereta()
     rute_nasional = [
-        # === JALUR TRANS-JAWA ===
-        ("Jakarta", "Bandung", 150),
-        ("Jakarta", "Cirebon", 210),
-        ("Bandung", "Cirebon", 130),
-        ("Bandung", "Yogyakarta", 400),
-        ("Cirebon", "Semarang", 230),
-        ("Semarang", "Yogyakarta", 120),
-        ("Semarang", "Surabaya", 350),
-        ("Yogyakarta", "Surabaya", 330),
-        ("Surabaya", "Malang", 90),
-        ("Yogyakarta", "Malang", 390),
-        ("Surabaya", "Banyuwangi", 290),
-        
-        # === JALUR TRANS-SUMATERA ===
-        ("Medan", "Binjai", 22),
-        ("Medan", "Rantau Prapat", 260),
-        ("Padang", "Pariaman", 60),
-        ("Palembang", "Prabumulih", 78),
-        ("Prabumulih", "Lubuklinggau", 224),
-        ("Palembang", "Tanjung Karang Lampung", 389),
-        
-        # === JALUR TRANS-SULAWESI ===
-        ("Makassar", "Maros", 30),
-        ("Maros", "Barru", 41),
-        ("Barru", "Parepare", 74),
-        
-        # === SIMULASI KONEKSI INTEGRASI MARITIM ===
-        ("Banyuwangi", "Makassar", 820),
-        ("Jakarta", "Palembang", 450)
+        ("Jakarta", "Bandung", 150), ("Jakarta", "Cirebon", 210),
+        ("Bandung", "Cirebon", 130), ("Bandung", "Yogyakarta", 400),
+        ("Cirebon", "Semarang", 230), ("Semarang", "Yogyakarta", 120),
+        ("Semarang", "Surabaya", 350), ("Yogyakarta", "Surabaya", 330),
+        ("Surabaya", "Malang", 90), ("Surabaya", "Banyuwangi", 290),
+        ("Medan", "Binjai", 22), ("Palembang", "Lampung", 389),
+        ("Makassar", "Parepare", 145), ("Banyuwangi", "Makassar", 820)
     ]
     for asal_st, tujuan_st, jarak_st in rute_nasional:
         geo_graph.tambah_rute(asal_st, tujuan_st, jarak_st)
@@ -91,206 +133,125 @@ graph = st.session_state.graph_kereta
 
 # --- 4. PEMBUATAN 5 MENU UTAMA (TABS) ---
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📍 Cari Rute Terpendek", 
-    "🗺️ Jaringan Rel Aktif", 
-    "⚙️ Panel CRUD Peta", 
-    "📊 Analisis & Statistik",
-    "📋 Log & Status Graph"
+    "📍 Cari Rute", "🗺️ Jaringan Rel", "⚙️ CRUD Panel", "📊 Statistik", "📋 Dev Log"
 ])
 
-# ==================== MENU 1: CARI RUTE [R - READ] ====================
+# ==================== MENU 1: CARI RUTE ====================
 with tab1:
-    st.subheader("🔍 Parameter Pencarian Lintasan Terpendek")
+    st.subheader("🌸 Temukan Perjalanan Terpendek")
     daftar_stasiun = sorted(list(graph.nodes))
 
     if len(daftar_stasiun) < 2:
-        st.info("Silakan tambahkan data stasiun terlebih dahulu di menu Panel CRUD Peta.")
+        st.info("Tambahkan stasiun terlebih dahulu.")
     else:
         col_asal, col_tujuan = st.columns(2)
         with col_asal:
-            stasiun_asal = st.selectbox("Pilih Stasiun Asal:", daftar_stasiun, index=0, key="asal_select")
+            st_asal = st.selectbox("Titik Berangkat:", daftar_stasiun, key="asal_s")
         with col_tujuan:
-            stasiun_tujuan = st.selectbox("Pilih Stasiun Tujuan:", daftar_stasiun, index=len(daftar_stasiun) - 1, key="tujuan_select")
+            st_tujuan = st.selectbox("Titik Tiba:", daftar_stasiun, index=len(daftar_stasiun)-1, key="tujuan_s")
 
-        tombol_cari = st.button("Hitung Rute Terbaik", type="primary")
-
-        if tombol_cari:
-            if stasiun_asal == stasiun_tujuan:
-                st.warning("Stasiun asal dan tujuan tidak boleh sama!")
+        if st.button("Mulai Hitung Rute", type="primary"):
+            if st_asal == st_tujuan:
+                st.warning("Asal dan tujuan tidak boleh sama!")
             else:
-                queue = [(0, stasiun_asal)]
-                jarak_terpendek = {node: float("inf") for node in graph.nodes}
-                jarak_terpendek[stasiun_asal] = 0
-                rute_sebelumnya = {node: None for node in graph.nodes}
+                # Dijkstra Logic
+                queue = [(0, st_asal)]
+                dist = {n: float("inf") for n in graph.nodes}
+                dist[st_asal] = 0
+                prev = {n: None for n in graph.nodes}
 
                 while queue:
-                    jarak_sekarang, stasiun_sekarang = heapq.heappop(queue)
+                    d, curr = heapq.heappop(queue)
+                    if curr == st_tujuan: break
+                    if d > dist[curr]: continue
+                    for neighbor, weight in graph.edges.get(curr, []):
+                        new_dist = d + weight
+                        if new_dist < dist[neighbor]:
+                            dist[neighbor] = new_dist
+                            prev[neighbor] = curr
+                            heapq.heappush(queue, (new_dist, neighbor))
 
-                    if stasiun_sekarang == stasiun_tujuan:
-                        break
+                path = []
+                temp = st_tujuan
+                while temp:
+                    path.append(temp)
+                    temp = prev[temp]
+                path.reverse()
 
-                    if jarak_sekarang > jarak_terpendek[stasiun_sekarang]:
-                        continue
-
-                    for tetangga, jarak_ke_tetangga in graph.edges.get(stasiun_sekarang, []):
-                        total_jarak_baru = jarak_sekarang + jarak_ke_tetangga
-
-                        if total_jarak_baru < jarak_terpendek[tetangga]:
-                            jarak_terpendek[tetangga] = total_jarak_baru
-                            rute_sebelumnya[tetangga] = stasiun_sekarang
-                            heapq.heappush(queue, (total_jarak_baru, tetangga))
-
-                jalur = []
-                stasiun_aktif = stasiun_tujuan
-                while stasiun_aktif is not None:
-                    jalur.append(stasiun_aktif)
-                    stasiun_aktif = rute_sebelumnya[stasiun_aktif]
-                jalur.reverse()
-
-                total_jarak = jarak_terpendek[stasiun_tujuan]
-
-                if total_jarak == float("inf"):
-                    st.error("Tidak ada rel penghubung antara kedua stasiun tersebut.")
+                if dist[st_tujuan] == float("inf"):
+                    st.error("Jalur tidak terhubung.")
                 else:
-                    st.success("🎉 Rute Terbaik Berhasil Ditemukan!")
-                    panah_rute = " ➔ ".join([f"**{st}**" for st in jalur])
-                    
-                    c_hasil1, c_hasil2 = st.columns([2, 1])
-                    with c_hasil1:
-                        st.markdown("### 🔀 Jalur Lintasan yang Dilewati:")
-                        st.info(panah_rute)
-                    with c_hasil2:
-                        st.markdown("### 📏 Total Jarak:")
-                        st.metric(label="Hasil Akumulasi", value=f"{total_jarak} KM")
+                    st.balloons()
+                    st.success(f"💖 Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
+                    st.info(" ➔ ".join([f"**{s}**" for s in path]))
 
-# ==================== MENU 2: JARINGAN REL [R - READ] ====================
+# ==================== MENU 2: JARINGAN REL ====================
 with tab2:
-    st.subheader("🗺️ Daftar Seluruh Jaringan Rel Kereta Aktif")
-    st.write("Daftar koneksi antar stasiun yang saat ini dapat dilewati oleh sistem kereta api:")
+    st.subheader("🗺️ Daftar Rel Aktif")
+    data_j = []
+    for s, t_list in graph.edges.items():
+        for t, j in t_list:
+            if (t, s, j) not in data_j: data_j.append((s, t, j))
     
-    data_jalur = []
-    for st_asal, tetanggas in graph.edges.items():
-        for st_tujuan, jarak in tetanggas:
-            if (st_tujuan, st_asal, jarak) not in data_jalur:
-                data_jalur.append((st_asal, st_tujuan, jarak))
+    col_a, col_b = st.columns(2)
+    for i, (a, b, j) in enumerate(sorted(data_j)):
+        target_col = col_a if i % 2 == 0 else col_b
+        target_col.write(f"🌸 **{a}** ↔️ **{b}** ({j} km)")
 
-    if not data_jalur:
-        st.info("Tidak ada rute kereta aktif saat ini.")
-    else:
-        col_rel1, col_rel2 = st.columns(2)
-        for i, (asal_p, tujuan_p, jarak_p) in enumerate(sorted(data_jalur)):
-            if i % 2 == 0:
-                with col_rel1:
-                    st.write(f"• **{asal_p}** ↔️ **{tujuan_p}** ({jarak_p} km)")
-            else:
-                with col_rel2:
-                    st.write(f"• **{asal_p}** ↔️ **{tujuan_p}** ({jarak_p} km)")
-
-# ==================== MENU 3: PANEL MANAGEMENT [C - U - D] ====================
+# ==================== MENU 3: CRUD PANEL ====================
 with tab3:
-    st.subheader("⚙️ Pusat Operasi Basis Data Jaringan (CRUD)")
-    st.write("Kelola penambahan, modifikasi bobot, dan penghapusan relasi rel kereta api secara dinamis.")
-    st.markdown("---")
+    st.subheader("⚙️ Pusat Kendali Data (Pink CRUD)")
+    c1, c2, c3 = st.columns(3)
     
-    col_c, col_u, col_d = st.columns(3)
-    
-    # 1. [C]REATE SECTION
-    with col_c:
-        st.markdown("### ➕ [C]reate Rute")
-        input_asal = st.text_input("Nama Stasiun Asal Baru:", key="c_asal")
-        input_tujuan = st.text_input("Nama Stasiun Tujuan Baru:", key="c_tujuan")
-        input_jarak = st.number_input("Jarak Rel (KM):", min_value=1, value=50, step=1, key="c_jarak")
-        
-        if st.button("Tambah Rute Baru", type="primary"):
-            if not input_asal or not input_tujuan:
-                st.error("Nama stasiun tidak boleh kosong!")
-            elif input_asal.strip().lower() == input_tujuan.strip().lower():
-                st.error("Stasiun asal dan tujuan tidak boleh sama!")
-            else:
-                graph.tambah_rute(input_asal, input_tujuan, input_jarak)
-                st.success(f"Berhasil menambahkan rute {input_asal.strip()} ↔️ {input_tujuan.strip()}!")
+    # Create
+    with c1:
+        st.markdown("### ➕ Tambah")
+        in_a = st.text_input("Asal:", key="ca")
+        in_b = st.text_input("Tujuan:", key="cb")
+        in_j = st.number_input("Jarak (KM):", min_value=1, value=10, key="cj")
+        if st.button("Simpan Baru"):
+            graph.tambah_rute(in_a, in_b, in_j)
+            st.rerun()
+
+    # Get rute for U & D
+    current_routes = []
+    for s, t_list in graph.edges.items():
+        for t, j in t_list:
+            if (t, s, j) not in current_routes: current_routes.append((s, t, j))
+
+    # Update
+    with c2:
+        st.markdown("### 📝 Update")
+        if current_routes:
+            u_opsi = [f"{a}-{t}" for a, t, j in sorted(current_routes)]
+            u_sel = st.selectbox("Pilih Rute:", u_opsi, key="us")
+            u_j = st.number_input("Jarak Baru:", min_value=1, key="uj")
+            if st.button("Update Jarak"):
+                a_u, t_u = u_sel.split("-")
+                graph.update_jarak_rute(a_u, t_u, u_j)
                 st.rerun()
 
-    # Ekstraksi rute yang ada untuk fitur Update & Delete
-    rute_tersedia = []
-    for st_asal, tetanggas in graph.edges.items():
-        for st_tujuan, jarak in tetanggas:
-            if (st_tujuan, st_asal, jarak) not in rute_tersedia:
-                rute_tersedia.append((st_asal, st_tujuan, jarak))
-    
-    # 2. [U]PDATE SECTION
-    with col_u:
-        st.markdown("### 📝 [U]pdate Jarak")
-        if not rute_tersedia:
-            st.info("Tidak ada rute untuk diubah.")
-        else:
-            opsi_update = [f"{a} ↔️ {t} ({j} km)" for a, t, j in sorted(rute_tersedia)]
-            pilihan_update = st.selectbox("Pilih Jalur yang Ingin Diubah:", opsi_update, key="u_select")
-            jarak_baru = st.number_input("Masukkan Jarak Baru (KM):", min_value=1, value=100, step=1, key="u_jarak")
-            
-            if st.button("Perbarui Jarak Rel", type="secondary"):
-                idx_u = opsi_update.index(pilihan_update)
-                st_asal_u, st_tujuan_u, _ = sorted(rute_tersedia)[idx_u]
-                graph.update_jarak_rute(st_asal_u, st_tujuan_u, jarak_baru)
-                st.success(f"Jarak rute {st_asal_u} ↔️ {st_tujuan_u} diperbarui menjadi {jarak_baru} KM!")
+    # Delete
+    with c3:
+        st.markdown("### 🗑️ Hapus")
+        if current_routes:
+            d_opsi = [f"{a}-{t}" for a, t, j in sorted(current_routes)]
+            d_sel = st.selectbox("Hapus Rute:", d_opsi, key="ds")
+            if st.button("Eksekusi Hapus"):
+                a_d, t_d = d_sel.split("-")
+                graph.hapus_rute(a_d, t_d)
                 st.rerun()
 
-    # 3. [D]ELETE SECTION
-    with col_d:
-        st.markdown("### 🗑️ [D]elete Rute")
-        if not rute_tersedia:
-            st.info("Tidak ada rute yang bisa dihapus.")
-        else:
-            opsi_hapus = [f"{a} ↔️ {t}" for a, t, _ in sorted(rute_tersedia)]
-            pilihan_hapus = st.selectbox("Pilih Jalur yang Ingin Dihapus:", opsi_hapus, key="d_select")
-            
-            if st.button("Hapus Jalur Ini"):
-                idx_d = opsi_hapus.index(pilihan_hapus)
-                st_asal_d, st_tujuan_d, _ = sorted(rute_tersedia)[idx_d]
-                graph.hapus_rute(st_asal_d, st_tujuan_d)
-                st.success(f"Jalur {st_asal_d} ↔️ {st_tujuan_d} berhasil diputus!")
-                st.rerun()
-
-# ==================== MENU 4: ANALISIS & STATISTIK ====================
+# ==================== MENU 4: ANALISIS ====================
 with tab4:
-    st.subheader("📊 Analisis Konektivitas Stasiun (*Centrality*)")
-    st.write("Analisis stasiun mana yang paling krusial dan memiliki percabangan rute terbanyak di Indonesia.")
-    
-    statistik_koneksi = {stasiun: len(jalur) for stasiun, jalur in graph.edges.items()}
-    
-    if not statistik_koneksi:
-        st.info("Data Graph kosong, tidak ada statistik yang bisa dianalisis.")
-    else:
-        stasiun_terpadat = max(statistik_koneksi, key=statistik_koneksi.get)
-        jumlah_koneksi_maks = statistik_koneksi[stasiun_terpadat]
-        
-        st.info(f"🏆 **Stasiun Utama / Hub Terpadat Saat Ini:** Stasiun **{stasiun_terpadat}** dengan total **{jumlah_koneksi_maks} jalur** percabangan.")
-        st.markdown("---")
-        
-        col_grafik1, col_grafik2 = st.columns([1, 1])
-        
-        with col_grafik1:
-            st.write("#### 📈 Grafik Jumlah Percabangan Rel per Stasiun")
-            st.bar_chart(statistik_koneksi)
-            
-        with col_grafik2:
-            st.write("#### 📋 Tabel Detail Frekuensi Jalur")
-            tabel_data = [{"Stasiun / Kota": k, "Jumlah Rute Terhubung": v} for k, v in sorted(statistik_koneksi.items(), key=lambda x: x[1], reverse=True)]
-            st.dataframe(tabel_data, use_container_width=True)
+    st.subheader("📊 Analisis Jaringan Pink")
+    stats = {k: len(v) for k, v in graph.edges.items()}
+    if stats:
+        st.bar_chart(stats)
+        st.dataframe([{"Stasiun": k, "Koneksi": v} for k, v in stats.items()], use_container_width=True)
 
-# ==================== MENU 5: LOG GRAPH ====================
+# ==================== MENU 5: DEV LOG ====================
 with tab5:
-    st.subheader("📋 Status Teknis Algoritma & Struktur Data")
-    st.write("Informasi ukuran matriks/list dari objek Graph di memori aplikasi saat ini:")
-    
-    c_box1, c_box2 = st.columns(2)
-    with c_box1:
-        st.metric(label="Total Simpul (Nodes / Vertices)", value=f"{len(graph.nodes)} Stasiun")
-    with c_box2:
-        total_koneksi = sum(len(j) for j in graph.edges.values()) // 2
-        st.metric(label="Total Sisi (Edges / Jalur Rel)", value=f"{total_koneksi} Hubungan")
-        
-    st.markdown("---")
-    st.markdown("### 🔍 Struktur Adjacency List (Raw Python Dictionary)")
-    st.write("Dosen dapat melihat representasi asli struktur data di memori melalui objek dictionary di bawah ini:")
+    st.subheader("📋 JSON Graph Data")
     st.json(graph.edges)
+    st.write(f"Total Stasiun: **{len(graph.nodes)}**")
