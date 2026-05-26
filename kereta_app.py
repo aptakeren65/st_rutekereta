@@ -244,7 +244,7 @@ with tab3:
 
 # ==================== MENU 4: ANALISIS ====================
 with tab4:
-    st.subheader("📊 Analisis Jaringan Pink")
+    st.subheader("📊 Analisis Jaringan ")
     stats = {k: len(v) for k, v in graph.edges.items()}
     if stats:
         st.bar_chart(stats)
