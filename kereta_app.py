@@ -132,8 +132,8 @@ if "graph_kereta" not in st.session_state:
 graph = st.session_state.graph_kereta
 
 # --- 4. PEMBUATAN 5 MENU UTAMA (TABS) ---
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📍 Cari Rute", "🗺️ Jaringan Rel", "⚙️ CRUD Panel", "📊 Statistik", "📋 Dev Log"
+tab1, tab2, tab3, tab4 = st.tabs([
+    "📍 Cari Rute", "🗺️ Jaringan Rel", "⚙️ CRUD Panel", "📊 Statistik"
 ])
 
 # ==================== MENU 1: CARI RUTE ====================
