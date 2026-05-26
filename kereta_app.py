@@ -34,10 +34,8 @@ class GraphKereta:
                 self.edges[tujuan].append((asal, jarak_km))
 
     def hapus_rute(self, asal, tujuan):
-        # Menghapus jalur dari asal ke tujuan
         if asal in self.edges:
             self.edges[asal] = [item for item in self.edges[asal] if item[0] != tujuan]
-        # Menghapus jalur dari tujuan ke asal (karena Undirected Graph)
         if tujuan in self.edges:
             self.edges[tujuan] = [item for item in self.edges[tujuan] if item[0] != asal]
 
@@ -82,11 +80,12 @@ if "graph_kereta" not in st.session_state:
 
 graph = st.session_state.graph_kereta
 
-# --- 4. PEMBUATAN 4 MENU UTAMA (TABS) ---
-tab1, tab2, tab3, tab4 = st.tabs([
+# --- 4. PEMBUATAN 5 MENU UTAMA (TABS) ---
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📍 Cari Rute Terpendek", 
     "🗺️ Jaringan Rel Aktif", 
     "⚙️ Kelola Peta Jaringan", 
+    "📊 Analisis & Statistik",
     "📋 Log & Status Graph"
 ])
 
@@ -202,7 +201,6 @@ with tab3:
         st.subheader("🗑️ Hapus Jalur Kereta")
         st.write("Putuskan jalur rel tertentu secara permanen dari sistem jaringan.")
         
-        # Ambil daftar rute unik untuk menu dropdown hapus
         rute_untuk_dihapus = []
         for st_asal, tetanggas in graph.edges.items():
             for st_tujuan, jarak in tetanggas:
@@ -216,10 +214,57 @@ with tab3:
             pilihan_hapus = st.selectbox("Pilih Jalur Rel yang Ingin Dihapus:", opsi_hapus)
             
             if st.button("Hapus Jalur Ini", type="secondary"):
-                # Memilah kembali teks pilihan menjadi stasiun asal dan tujuan asli
                 idx = opsi_hapus.index(pilihan_hapus)
                 st_asal_hapus, st_tujuan_hapus = sorted(rute_untuk_dihapus)[idx]
                 
                 graph.hapus_rute(st_asal_hapus, st_tujuan_hapus)
                 st.success(f"Jalur rel {st_asal_hapus} ↔️ {st_tujuan_hapus} berhasil dihapus dari sistem!")
                 st.rerun()
+
+# ==================== MENU 4: ANALISIS & STATISTIK (MENU BARU) ====================
+with tab4:
+    st.subheader("📊 Analisis Konektivitas Stasiun (*Centrality*)")
+    st.write("Analisis stasiun mana yang paling krusial dan memiliki percabangan rute terbanyak di Indonesia.")
+    
+    # Hitung jumlah koneksi per stasiun
+    statistik_koneksi = {stasiun: len(jalur) for stasiun, jalur in graph.edges.items()}
+    
+    if not statistik_koneksi:
+        st.info("Data Graph kosong, tidak ada statistik yang bisa dianalisis.")
+    else:
+        # Menentukan stasiun terpadat
+        stasiun_terpadat = max(statistik_koneksi, key=statistik_koneksi.get)
+        jumlah_koneksi_maks = statistik_koneksi[stasiun_terpadat]
+        
+        st.info(f"🏆 **Stasiun Utama / Hub Terpadat Saat Ini:** Stasiun **{stasiun_terpadat}** dengan total **{jumlah_koneksi_maks} jalur** percabangan.")
+        st.markdown("---")
+        
+        col_grafik1, col_grafik2 = st.columns([1, 1])
+        
+        with col_grafik1:
+            st.write("#### 📈 Grafik Jumlah Percabangan Rel per Stasiun")
+            # Menampilkan grafik batang bawaan streamlit
+            st.bar_chart(statistik_koneksi)
+            
+        with col_grafik2:
+            st.write("#### 📋 Tabel Detail Frekuensi Jalur")
+            # Mengubah format dictionary ke list of dict agar rapi dalam bentuk dataframe/tabel
+            tabel_data = [{"Stasiun / Kota": k, "Jumlah Rute Terhubung": v} for k, v in sorted(statistik_koneksi.items(), key=lambda x: x[1], reverse=True)]
+            st.dataframe(tabel_data, use_container_width=True)
+
+# ==================== MENU 5: LOG GRAPH ====================
+with tab5:
+    st.subheader("📋 Status Teknis Algoritma & Struktur Data")
+    st.write("Informasi ukuran matriks/list dari objek Graph di memori aplikasi saat ini:")
+    
+    c_box1, c_box2 = st.columns(2)
+    with c_box1:
+        st.metric(label="Total Simpul (Nodes / Vertices)", value=f"{len(graph.nodes)} Stasiun")
+    with c_box2:
+        total_koneksi = sum(len(j) for j in graph.edges.values()) // 2
+        st.metric(label="Total Sisi (Edges / Jalur Rel)", value=f"{total_koneksi} Hubungan")
+        
+    st.markdown("---")
+    st.markdown("### 🔍 Struktur Adjacency List (Raw Python Dictionary)")
+    st.write("Dosen dapat melihat representasi asli struktur data di memori melalui objek dictionary di bawah ini:")
+    st.json(graph.edges)
