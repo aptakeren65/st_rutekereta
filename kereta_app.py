@@ -68,11 +68,13 @@ class GraphKereta:
         return jarak_terpendek[tujuan], jalur
 
 
-# --- 4. INISIALISASI DATA DI DALAM SESSION STATE ---
+# --- 4. DATA DEFAULT (SESSION STATE) ---
 if "graph_kereta" not in st.session_state:
     geo_graph = GraphKereta()
-    # Data Default Jaringan Kereta Api Pulau Jawa
-    rute_default = [
+    
+    # DATA JALUR KERETA NASIONAL INDONESIA (SIMULASI HUB UTAMA)
+    rute_nasional = [
+        # === JALUR TRANS-JAWA (Koneksi Utama) ===
         ("Jakarta", "Bandung", 150),
         ("Jakarta", "Cirebon", 210),
         ("Bandung", "Cirebon", 130),
@@ -83,8 +85,28 @@ if "graph_kereta" not in st.session_state:
         ("Yogyakarta", "Surabaya", 330),
         ("Surabaya", "Malang", 90),
         ("Yogyakarta", "Malang", 390),
+        ("Surabaya", "Banyuwangi", 290), # Ujung Timur Jawa
+        
+        # === JALUR TRANS-SUMATERA (Koneksi Inter-Kota) ===
+        ("Medan", "Binjai", 22),
+        ("Medan", "Rantau Prapat", 260),
+        ("Padang", "Pariaman", 60),
+        ("Palembang", "Prabumulih", 78),
+        ("Prabumulih", "Lubuklinggau", 224),
+        ("Palembang", "Tanjung Karang Lampung", 389), # Ujung Selatan Sumatera
+        
+        # === JALUR TRANS-SULAWESI (Jalur Baru) ===
+        ("Makassar", "Maros", 30),
+        ("Maros", "Barru", 41),
+        ("Barru", "Parepare", 74),
+        
+        # === SIMULASI KONEKSI INTEGRASI MARITIM (Antar-Pulau) ===
+        # Catatan untuk Dosen: Ini simulasi integrasi kapal feri/tol laut logistik KAI
+        ("Banyuwangi", "Makassar", 820), # Penyeberangan laut Jawa-Sulawesi
+        ("Jakarta", "Palembang", 450)    # Penyeberangan laut Jawa-Sumatera
     ]
-    for asal_st, tujuan_st, jarak_st in rute_default:
+    
+    for asal_st, tujuan_st, jarak_st in rute_nasional:
         geo_graph.tambah_rute(asal_st, tujuan_st, jarak_st)
     st.session_state.graph_kereta = geo_graph
 
@@ -106,7 +128,7 @@ with st.sidebar:
 
 # ==================== PILIHAN MENU 1: CARI RUTE ====================
 if pilihan_menu == "📍 Cari Rute Terpendek":
-    st.title("🚇 Pencari Rute Terpendek Kereta Air")
+    st.title("🚇 Aplikasi Pencari Rute Terpendek Kereta Api")
     st.write("Temukan jalur kereta api tercepat menggunakan efisiensi algoritma.")
     st.markdown("---")
 
