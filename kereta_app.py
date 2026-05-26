@@ -196,7 +196,7 @@ with tab2:
     col_a, col_b = st.columns(2)
     for i, (a, b, j) in enumerate(sorted(data_j)):
         target_col = col_a if i % 2 == 0 else col_b
-        target_col.write(f"🌸 **{a}** ↔️ **{b}** ({j} km)")
+        target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km)")
 
 # ==================== MENU 3: CRUD PANEL ====================
 with tab3:
@@ -249,9 +249,3 @@ with tab4:
     if stats:
         st.bar_chart(stats)
         st.dataframe([{"Stasiun": k, "Koneksi": v} for k, v in stats.items()], use_container_width=True)
-
-# ==================== MENU 5: DEV LOG ====================
-with tab5:
-    st.subheader("📋 JSON Graph Data")
-    st.json(graph.edges)
-    st.write(f"Total Stasiun: **{len(graph.nodes)}**")
