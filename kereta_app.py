@@ -68,7 +68,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("💖 Train Route Planner: Pink Edition")
+st.title("🚇 Train Route Planner: Pink Edition")
 st.write("Navigasi Jalur Kereta Api Indonesia dengan **Algoritma Dijkstra**")
 st.markdown("---")
 
@@ -138,7 +138,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # ==================== MENU 1: CARI RUTE ====================
 with tab1:
-    st.subheader("🌸 Temukan Perjalanan Terpendek")
+    st.subheader("🔍 Temukan Perjalanan Terpendek")
     daftar_stasiun = sorted(list(graph.nodes))
 
     if len(daftar_stasiun) < 2:
@@ -182,7 +182,7 @@ with tab1:
                     st.error("Jalur tidak terhubung.")
                 else:
                     st.balloons()
-                    st.success(f"💖 Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
+                    st.success(f"🎉Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
                     st.info(" ➔ ".join([f"**{s}**" for s in path]))
 
 # ==================== MENU 2: JARINGAN REL ====================
