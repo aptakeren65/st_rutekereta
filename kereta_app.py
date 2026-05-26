@@ -8,13 +8,14 @@ st.write("Implementasi Struktur Data **Graph (Adjacency List)** dan **Algoritma 
 st.markdown("---")
 
 
-# --- 2. STRUKTUR DATA GRAPH ---
+# --- 2. STRUKTUR DATA GRAPH (DENGAN OPERASI CRUD) ---
 class GraphKereta:
 
     def __init__(self):
         self.nodes = set()
         self.edges = {}
 
+    # [C]REATE: Menambahkan Stasiun & Rute Baru
     def tambah_stasiun(self, nama_stasiun):
         nama_stasiun = nama_stasiun.strip()
         if nama_stasiun:
@@ -33,6 +34,14 @@ class GraphKereta:
                 self.edges[asal].append((tujuan, jarak_km))
                 self.edges[tujuan].append((asal, jarak_km))
 
+    # [U]PDATE: Memperbarui Jarak/Bobot Rute yang Sudah Ada
+    def update_jarak_rute(self, asal, tujuan, jarak_baru):
+        if asal in self.edges:
+            self.edges[asal] = [(node, jarak_baru) if node == tujuan else (node, j) for node, j in self.edges[asal]]
+        if tujuan in self.edges:
+            self.edges[tujuan] = [(node, jarak_baru) if node == asal else (node, j) for node, j in self.edges[tujuan]]
+
+    # [D]ELETE: Menghapus Rute dari Jaringan Graph
     def hapus_rute(self, asal, tujuan):
         if asal in self.edges:
             self.edges[asal] = [item for item in self.edges[asal] if item[0] != tujuan]
@@ -84,18 +93,18 @@ graph = st.session_state.graph_kereta
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📍 Cari Rute Terpendek", 
     "🗺️ Jaringan Rel Aktif", 
-    "⚙️ Kelola Peta Jaringan", 
+    "⚙️ Panel CRUD Peta", 
     "📊 Analisis & Statistik",
     "📋 Log & Status Graph"
 ])
 
-# ==================== MENU 1: CARI RUTE ====================
+# ==================== MENU 1: CARI RUTE [R - READ] ====================
 with tab1:
     st.subheader("🔍 Parameter Pencarian Lintasan Terpendek")
     daftar_stasiun = sorted(list(graph.nodes))
 
     if len(daftar_stasiun) < 2:
-        st.info("Silakan tambahkan data stasiun terlebih dahulu di menu Kelola Peta Jaringan.")
+        st.info("Silakan tambahkan data stasiun terlebih dahulu di menu Panel CRUD Peta.")
     else:
         col_asal, col_tujuan = st.columns(2)
         with col_asal:
@@ -154,7 +163,7 @@ with tab1:
                         st.markdown("### 📏 Total Jarak:")
                         st.metric(label="Hasil Akumulasi", value=f"{total_jarak} KM")
 
-# ==================== MENU 2: JARINGAN REL ====================
+# ==================== MENU 2: JARINGAN REL [R - READ] ====================
 with tab2:
     st.subheader("🗺️ Daftar Seluruh Jaringan Rel Kereta Aktif")
     st.write("Daftar koneksi antar stasiun yang saat ini dapat dilewati oleh sistem kereta api:")
@@ -177,62 +186,81 @@ with tab2:
                 with col_rel2:
                     st.write(f"• **{asal_p}** ↔️ **{tujuan_p}** ({jarak_p} km)")
 
-# ==================== MENU 3: KELOLA PETA ====================
+# ==================== MENU 3: PANEL MANAGEMENT [C - U - D] ====================
 with tab3:
-    col_in1, col_in2 = st.columns(2)
+    st.subheader("⚙️ Pusat Operasi Basis Data Jaringan (CRUD)")
+    st.write("Kelola penambahan, modifikasi bobot, dan penghapusan relasi rel kereta api secara dinamis.")
+    st.markdown("---")
     
-    with col_in1:
-        st.subheader("➕ Tambah Hubungan Rel Baru")
-        input_asal = st.text_input("Nama Kota/Stasiun Asal Baru:")
-        input_tujuan = st.text_input("Nama Kota/Stasiun Tujuan Baru:")
-        input_jarak = st.number_input("Jarak Antar Kota (KM):", min_value=1, value=50, step=1)
+    col_c, col_u, col_d = st.columns(3)
+    
+    # 1. [C]REATE SECTION
+    with col_c:
+        st.markdown("### ➕ [C]reate Rute")
+        input_asal = st.text_input("Nama Stasiun Asal Baru:", key="c_asal")
+        input_tujuan = st.text_input("Nama Stasiun Tujuan Baru:", key="c_tujuan")
+        input_jarak = st.number_input("Jarak Rel (KM):", min_value=1, value=50, step=1, key="c_jarak")
         
-        if st.button("Simpan Data Rute", type="primary"):
+        if st.button("Tambah Rute Baru", type="primary"):
             if not input_asal or not input_tujuan:
-                st.error("Form input stasiun tidak boleh kosong!")
+                st.error("Nama stasiun tidak boleh kosong!")
             elif input_asal.strip().lower() == input_tujuan.strip().lower():
                 st.error("Stasiun asal dan tujuan tidak boleh sama!")
             else:
                 graph.tambah_rute(input_asal, input_tujuan, input_jarak)
-                st.success(f"Berhasil menyambungkan {input_asal.strip()} ↔️ {input_tujuan.strip()} ({input_jarak} km)!")
-                st.rerun()
-                
-    with col_in2:
-        st.subheader("🗑️ Hapus Jalur Kereta")
-        st.write("Putuskan jalur rel tertentu secara permanen dari sistem jaringan.")
-        
-        rute_untuk_dihapus = []
-        for st_asal, tetanggas in graph.edges.items():
-            for st_tujuan, jarak in tetanggas:
-                if (st_tujuan, st_asal) not in rute_untuk_dihapus:
-                    rute_untuk_dihapus.append((st_asal, st_tujuan))
-                    
-        if not rute_untuk_dihapus:
-            st.info("Tidak ada rute yang bisa dihapus.")
-        else:
-            opsi_hapus = [f"{a} ↔️ {t}" for a, t in sorted(rute_untuk_dihapus)]
-            pilihan_hapus = st.selectbox("Pilih Jalur Rel yang Ingin Dihapus:", opsi_hapus)
-            
-            if st.button("Hapus Jalur Ini", type="secondary"):
-                idx = opsi_hapus.index(pilihan_hapus)
-                st_asal_hapus, st_tujuan_hapus = sorted(rute_untuk_dihapus)[idx]
-                
-                graph.hapus_rute(st_asal_hapus, st_tujuan_hapus)
-                st.success(f"Jalur rel {st_asal_hapus} ↔️ {st_tujuan_hapus} berhasil dihapus dari sistem!")
+                st.success(f"Berhasil menambahkan rute {input_asal.strip()} ↔️ {input_tujuan.strip()}!")
                 st.rerun()
 
-# ==================== MENU 4: ANALISIS & STATISTIK (MENU BARU) ====================
+    # Ekstraksi rute yang ada untuk fitur Update & Delete
+    rute_tersedia = []
+    for st_asal, tetanggas in graph.edges.items():
+        for st_tujuan, jarak in tetanggas:
+            if (st_tujuan, st_asal, jarak) not in rute_tersedia:
+                rute_tersedia.append((st_asal, st_tujuan, jarak))
+    
+    # 2. [U]PDATE SECTION
+    with col_u:
+        st.markdown("### 📝 [U]pdate Jarak")
+        if not rute_tersedia:
+            st.info("Tidak ada rute untuk diubah.")
+        else:
+            opsi_update = [f"{a} ↔️ {t} ({j} km)" for a, t, j in sorted(rute_tersedia)]
+            pilihan_update = st.selectbox("Pilih Jalur yang Ingin Diubah:", opsi_update, key="u_select")
+            jarak_baru = st.number_input("Masukkan Jarak Baru (KM):", min_value=1, value=100, step=1, key="u_jarak")
+            
+            if st.button("Perbarui Jarak Rel", type="secondary"):
+                idx_u = opsi_update.index(pilihan_update)
+                st_asal_u, st_tujuan_u, _ = sorted(rute_tersedia)[idx_u]
+                graph.update_jarak_rute(st_asal_u, st_tujuan_u, jarak_baru)
+                st.success(f"Jarak rute {st_asal_u} ↔️ {st_tujuan_u} diperbarui menjadi {jarak_baru} KM!")
+                st.rerun()
+
+    # 3. [D]ELETE SECTION
+    with col_d:
+        st.markdown("### 🗑️ [D]elete Rute")
+        if not rute_tersedia:
+            st.info("Tidak ada rute yang bisa dihapus.")
+        else:
+            opsi_hapus = [f"{a} ↔️ {t}" for a, t, _ in sorted(rute_tersedia)]
+            pilihan_hapus = st.selectbox("Pilih Jalur yang Ingin Dihapus:", opsi_hapus, key="d_select")
+            
+            if st.button("Hapus Jalur Ini"):
+                idx_d = opsi_hapus.index(pilihan_hapus)
+                st_asal_d, st_tujuan_d, _ = sorted(rute_tersedia)[idx_d]
+                graph.hapus_rute(st_asal_d, st_tujuan_d)
+                st.success(f"Jalur {st_asal_d} ↔️ {st_tujuan_d} berhasil diputus!")
+                st.rerun()
+
+# ==================== MENU 4: ANALISIS & STATISTIK ====================
 with tab4:
     st.subheader("📊 Analisis Konektivitas Stasiun (*Centrality*)")
     st.write("Analisis stasiun mana yang paling krusial dan memiliki percabangan rute terbanyak di Indonesia.")
     
-    # Hitung jumlah koneksi per stasiun
     statistik_koneksi = {stasiun: len(jalur) for stasiun, jalur in graph.edges.items()}
     
     if not statistik_koneksi:
         st.info("Data Graph kosong, tidak ada statistik yang bisa dianalisis.")
     else:
-        # Menentukan stasiun terpadat
         stasiun_terpadat = max(statistik_koneksi, key=statistik_koneksi.get)
         jumlah_koneksi_maks = statistik_koneksi[stasiun_terpadat]
         
@@ -243,12 +271,10 @@ with tab4:
         
         with col_grafik1:
             st.write("#### 📈 Grafik Jumlah Percabangan Rel per Stasiun")
-            # Menampilkan grafik batang bawaan streamlit
             st.bar_chart(statistik_koneksi)
             
         with col_grafik2:
             st.write("#### 📋 Tabel Detail Frekuensi Jalur")
-            # Mengubah format dictionary ke list of dict agar rapi dalam bentuk dataframe/tabel
             tabel_data = [{"Stasiun / Kota": k, "Jumlah Rute Terhubung": v} for k, v in sorted(statistik_koneksi.items(), key=lambda x: x[1], reverse=True)]
             st.dataframe(tabel_data, use_container_width=True)
 
