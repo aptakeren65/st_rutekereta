@@ -106,7 +106,7 @@ with st.sidebar:
 
 # ==================== PILIHAN MENU 1: CARI RUTE ====================
 if pilihan_menu == "📍 Cari Rute Terpendek":
-    st.title("🚇 Pencari Rute Terpendek Kereta Api")
+    st.title("🚇 Pencari Rute Terpendek Kereta")
     st.write("Temukan jalur kereta api tercepat menggunakan efisiensi algoritma.")
     st.markdown("---")
 
