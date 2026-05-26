@@ -223,20 +223,3 @@ with tab3:
                 graph.hapus_rute(st_asal_hapus, st_tujuan_hapus)
                 st.success(f"Jalur rel {st_asal_hapus} ↔️ {st_tujuan_hapus} berhasil dihapus dari sistem!")
                 st.rerun()
-
-# ==================== MENU 4: LOG GRAPH ====================
-with tab4:
-    st.subheader("📋 Status Teknis Algoritma & Struktur Data")
-    st.write("Informasi ukuran matriks/list dari objek Graph di memori aplikasi saat ini:")
-    
-    c_box1, c_box2 = st.columns(2)
-    with c_box1:
-        st.metric(label="Total Simpul (Nodes / Vertices)", value=f"{len(graph.nodes)} Stasiun")
-    with c_box2:
-        total_koneksi = sum(len(j) for j in graph.edges.values()) // 2
-        st.metric(label="Total Sisi (Edges / Jalur Rel)", value=f"{total_koneksi} Hubungan")
-        
-    st.markdown("---")
-    st.markdown("### 🔍 Struktur Adjacency List (Raw Python Dictionary)")
-    st.write("Dosen dapat melihat representasi asli struktur data di memori melalui objek dictionary di bawah ini:")
-    st.json(graph.edges)
