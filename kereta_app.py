@@ -368,7 +368,7 @@ with tab5:
         tipe_kondisi = "ramai"
     else:
         status_teks = "🔴 MACET TOTAL / SANGAT PADAT"
-        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah!. Disarankan segera menuju stasiun sekarang."
+        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah!. Disarankan segera menuju stasiun lain."
         tipe_kondisi = "macet"
 
     # Menampilkan 3 Metrik Utama di Atas
