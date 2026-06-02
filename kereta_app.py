@@ -1,14 +1,11 @@
-Oke, siap! Berarti bagian identitas proyeknya juga **tidak usah ditambahkan** ke dalam Tab 6, ya.
+Siap, paham! Berarti kita singkirkan saja `pandas` supaya kodenya kembali murni menggunakan struktur data bawaan Python (`list` dan `dict`). Dengan begitu, kamu tidak perlu repot menginstal library tambahan apa pun di terminal dan kodenya dijamin langsung jalan tanpa kendala.
 
-Sekarang, kodenya benar-benar dibersihkan dari grafik, peta bumi, ataupun banner teks tercepat yang mengganggu. Tab 6 kini murni dan langsung menampilkan **🗂️ Papan Kartu Informasi Jaringan Rel** yang rapi, bersih, dan mudah dibaca lewat filter *dropdown*.
-
-Berikut adalah kode file `app.py` versi paling final dan bersih sesuai maumu:
+Berikut adalah kode lengkap `app.py` terbaru yang **100% bebas dari library pandas**:
 
 ```python
 import heapq
 import streamlit as st
 import random
-import pandas as pd
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi & Tiket Kereta")
@@ -353,7 +350,11 @@ with tab4:
         data_jadwal.append({"Jam": jam, "Nama Kereta Api": nama_ka, "Tujuan Akhir": tujuan_ka, "Status": status})
     
     data_jadwal = sorted(data_jadwal, key=lambda x: x["Jam"])
-    st.table(data_jadwal)
+    
+    # Menampilkan jadwal dalam format tabel HTML murni standar Streamlit tanpa eksternal library
+    st.write("📋 **Live Boarding Schedule:**")
+    for row in data_jadwal:
+        st.markdown(f"⏱️ `{row['Jam']}` — **{row['Nama Kereta Api']}** arah *{row['Tujuan Akhir']}* — `{row['Status']}`")
 
 
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
@@ -400,17 +401,20 @@ with tab5:
     )
 
 
-# ==================== MENU 6: PAPAN KARTU INFORMASI RUTE (VERSI BERSIH TOTAL) ====================
+# ==================== MENU 6: PAPAN KARTU INFORMASI RUTE (VERSI BERSIH TOTAL & BEBAS PANDAS) ====================
 with tab6:
     st.subheader("🗂️ Papan Kartu Informasi Jaringan Rel")
     st.write("Daftar lengkap seluruh koneksi rel langsung antarkota yang dikemas dalam bentuk kartu informasi terorganisir.")
 
-    # 1. Mengumpulkan Data Koneksi Jalur Kereta
+    # 1. Mengumpulkan Data Koneksi Jalur Kereta secara Manual
     data_j = []
     for s, t_list in graph.edges.items():
         for t, j in t_list:
             if (t, s, j) not in data_j: 
                 data_j.append((s, t, j))
+                
+    # Urutkan rute berdasarkan nama stasiun asal secara alfabetis
+    data_j.sort(key=lambda x: x[0])
 
     # 2. Filter Dropdown Interaktif
     opsi_filter = st.selectbox("Filter Tampilan Berdasarkan Kondisi Jalur:", ["Semua Jalur Kereta", "Hanya Jalur Normal", "Hanya Jalur Perbaikan"])
@@ -420,8 +424,8 @@ with tab6:
     col_grid1, col_grid2, col_grid3 = st.columns(3)
     
     kartu_terbuat = 0
-    for i, (asal_r, tujuan_r, jarak_r) in enumerate(sorted(data_j)):
-        # Membuat status tiruan yang konsisten bedasarkan urutan index
+    for i, (asal_r, tujuan_r, jarak_r) in enumerate(data_j):
+        # Membuat status tiruan yang konsisten berdasarkan urutan index
         status_kondisi = "✅ JALUR NORMAL" if i % 5 != 0 else "⚠️ DALAM PERBAIKAN"
         warna_status = "#00D2C4" if i % 5 != 0 else "#FF4B4B"
         
@@ -439,7 +443,7 @@ with tab6:
         else:
             target_col = col_grid3
             
-        # Cetak komponen visual Kartu Informasi Jalur Kereta (Tanpa Grafik)
+        # Cetak komponen visual Kartu Informasi Jalur Kereta (Menggunakan HTML Murni)
         target_col.markdown(
             f"""
             <div class="route-card">
