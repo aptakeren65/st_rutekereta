@@ -348,7 +348,7 @@ with tab4:
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
 with tab5:
     st.subheader("🎰 Live Traffic ")
-    st.write("ini untuk memantau status keramaian dan lalu lintas stasiun.")
+    st.write(" untuk memantau status keramaian dan lalu lintas stasiun.")
     
     st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
@@ -376,7 +376,7 @@ with tab5:
         st.metric(label="Jumlah Kereta Bersandar/Antri", value=f"{jumlah_antrean} KA")
         
     st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
-    st.progress(kepadatan_persen / 100)
+    st.progress(kepadatan_persen / 1000)
     st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
     
     st.markdown(
