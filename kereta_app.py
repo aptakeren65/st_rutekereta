@@ -396,11 +396,11 @@ with tab5:
     # 3. SEKAT WARNA DINAMIS (Tepat di antara stasiun dan metrik)
     st.write("") 
     if warna_alert == "lancar":
-        st.success(f"🟢 **Status Stasiun {st_pilih_simulasi}:** Saat ini terpantau sangat lancar dan sepi.")
+        st.success(f"🟢 **Status Stasiun {st_pilih_simulasi}:** Saat ini terpantau sangat lancar.")
     elif warna_alert == "ramai":
         st.warning(f"🟡 **Perhatian:** Stasiun {st_pilih_simulasi} dalam kondisi cukup padat/ramai.")
     else:
-        st.error(f"🚨 **Peringatan:** Stasiun {st_pilih_simulasi} dalam kondisi macet total/sangat padat!")
+        st.error(f"🚨 **Peringatan:** Stasiun {st_pilih_simulasi} dalam kondisi sangat padat!")
     st.write("")
 
     # 4. Hasil Metrik Kepadatan
