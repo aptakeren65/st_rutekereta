@@ -1,57 +1,59 @@
 import heapq
 import streamlit as st
 
-# --- 1. PENGATURAN HALAMAN & TEMA WARNA PINK (CSS INJECTION) ---
+# --- 1. PENGATURAN HALAMAN & TEMA WARNA BIRU TUA (CSS INJECTION) ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
 
-# Injeksi CSS Custom untuk Tema Pink dengan Latar Belakang Bintik-Bintik (Polkadot)
+# Injeksi CSS Custom untuk Tema Biru Tua dengan Latar Belakang Bintik-Bintik
 st.markdown(
     """
     <style>
-    /* 1. Latar Belakang Halaman Utama dengan Pola Bintik-Bintik Halus */
+    /* 1. Latar Belakang Halaman Utama (Biru Tua dengan Pola Bintik Soft Blue) */
     .stApp {
-        background-color: #fff0f6;
-        background-image: radial-gradient(#ffccdb 15%, transparent 16%),
-                          radial-gradient(#ffccdb 15%, transparent 16%);
+        background-color: #0B192C;
+        background-image: radial-gradient(#1E3E62 15%, transparent 16%),
+                          radial-gradient(#1E3E62 15%, transparent 16%);
         background-size: 30px 30px;
         background-position: 0 0, 15px 15px;
     }
     
-    /* 2. Warna Judul dan Teks Utama (Deep Pink / Rose) */
+    /* 2. Warna Judul Utama dan Subheader (Ice Blue / Cyan Soft) */
     h1, h2, h3, h4 {
-        color: #d63384 !important;
+        color: #00D2C4 !important;
         font-weight: bold;
     }
     
-    p, b, span {
-        color: #495057;
+    /* Warna teks deskripsi bawaan */
+    p, b, span, label {
+        color: #E0E7FF !important;
     }
 
-    /* 3. Desain Kartu pada Tabs (White dengan Kontras Border Pink) */
+    /* 3. Desain Kartu pada Tabs (Muted Dark Blue dengan Border) */
     .stTabs [data-baseweb="tab-panel"] {
-        background-color: #ffffff;
+        background-color: #1E3E62;
         padding: 30px;
         border-radius: 20px;
-        border: 2px solid #fcc2d7;
-        box-shadow: 0 10px 20px rgba(214, 51, 132, 0.08);
+        border: 2px solid #00D2C4;
+        box-shadow: 0 10px 20px rgba(0, 210, 196, 0.1);
         margin-top: 15px;
     }
 
-    /* 4. Styling Tab Menu agar berwarna Pink saat aktif */
+    /* 4. Styling Tab Menu agar berwarna Cyan saat aktif */
     button[data-baseweb="tab"] {
         font-size: 18px;
         font-weight: bold;
+        color: #94A3B8 !important;
     }
     
     button[aria-selected="true"] {
-        color: #d63384 !important;
-        border-bottom-color: #d63384 !important;
+        color: #00D2C4 !important;
+        border-bottom-color: #00D2C4 !important;
     }
 
-    /* 5. Custom Button (Pink Gradient) */
+    /* 5. Custom Button (Neon Cyan/Blue Gradient) */
     .stButton>button {
-        background-color: #ff85a1;
-        color: white !important;
+        background-color: #00D2C4;
+        color: #0B192C !important;
         border-radius: 12px;
         border: none;
         transition: 0.3s;
@@ -59,25 +61,50 @@ st.markdown(
     }
     
     .stButton>button:hover {
-        background-color: #d63384;
+        background-color: #00F5E6;
         border: none;
-        color: white !important;
-        box-shadow: 0 4px 10px rgba(214, 51, 132, 0.2);
+        color: #0B192C !important;
+        box-shadow: 0 4px 15px rgba(0, 210, 196, 0.4);
     }
     
     /* 6. Info & Success Box Custom Color */
     .stAlert {
         border-radius: 15px;
-        border: 1px solid #fcc2d7;
-        background-color: #fff5f5;
+        border: 1px solid #00D2C4;
+        background-color: #0B192C;
+    }
+    
+    /* Menyelaraskan teks di dalam tabel st.table agar terbaca di background gelap */
+    .stTable table {
+        color: #E0E7FF !important;
+        background-color: #1E3E62 !important;
+        border-radius: 10px;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+# --- JALUR JUDUL UTAMA & TABEL INFORMASI ---
 st.title("🚇 Train Route Planner")
 st.write("Navigasi Jalur Kereta Api Indonesia")
+
+# Tabel identitas diletakkan tepat di bawah st.write judul
+informasi_aplikasi = {
+    "Detail Proyek": [
+        "Nama Aplikasi",
+        "NIM Akhir Mahasiswa",
+        "Algoritma",
+        "Struktur Data"
+    ],
+    "Informasi": [
+        "Sistem Navigasi Jalur Kereta Api",
+        "056",
+        "Dijkstra Algorithm",
+        "Graph (Adjacency List & Heap)"
+    ]
+}
+st.table(informasi_aplikasi)
 st.markdown("---")
 
 
@@ -194,7 +221,6 @@ with tab1:
                 if dist[st_tujuan] == float("inf"):
                     st.error("Jalur tidak terhubung.")
                 else:
-                    # Efek st.balloons() sudah dihapus di sini agar loading lebih clean
                     st.success(f"Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
                     st.info(" ➔ ".join([f"**{s}**" for s in path]))
 
