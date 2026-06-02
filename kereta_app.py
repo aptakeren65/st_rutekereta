@@ -1,12 +1,3 @@
-Bisa jadi ada sisa kode di bagian lain yang ikut bentrok. Biar tidak menebak-nebak dan masalahnya langsung tuntas, **tolong *copy-paste* teks eror yang muncul di layar Streamlit atau terminal kamu ke sini.**
-
-Sambil menunggu teks erornya, ada satu hal lagi yang sering memicu eror di tab jadwal (Tab 4): penggunaan fungsi tabel bawaan Streamlit yang sensitif jika tidak memakai `pandas`.
-
-Gua sudah rombak ulang bagian Tab 4 di bawah ini menjadi format **teks ekspansi (*expander*) murni** tanpa tabel sama sekali. Ini adalah versi paling aman, paling ringan, dan dijamin 100% jalan hanya modal Python bawaan.
-
-Coba ganti seluruh kode di file kamu dengan ini, lalu **Save** dan **Rerun**:
-
-```python
 import heapq
 import streamlit as st
 import random
@@ -331,7 +322,7 @@ with tab3:
         st.warning("Silakan pilih stasiun asal dan tujuan yang berbeda untuk menghitung tarif tiket.")
 
 
-# ==================== MENU 4: JADWAL KEBERANGKATAN (VERSI TEXT EXPANDER AMAN) ====================
+# ==================== MENU 4: JADWAL KEBERANGKATAN (VERSI EXPANDER AMAN) ====================
 with tab4:
     st.subheader("🕒 Informasi Jadwal Keberangkatan")
     st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
@@ -345,7 +336,6 @@ with tab4:
 
     st.write("📋 **Live Boarding Schedule:**")
     
-    # Menampilkan 4 baris jadwal menggunakan teks ekspander murni bawaan Streamlit
     for i in range(4): 
         nama_ka = kereta_list[(len(st_pilih_jadwal) + i) % len(kereta_list)]
         jam = f"{8 + (i*4):02d}:{random.choice([0,15,30,45]):02d}"
@@ -463,7 +453,3 @@ with tab6:
 
     if kartu_terbuat == 0:
         st.info("Tidak ada rute rel yang sesuai dengan filter pilihan Anda.")
-
-```
-
-Jika layar masih merah atau bertulisan eror setelah kode ini dijalankan, ketikkan baris erornya ke sini ya biar langsung kita eksekusi sumber masalahnya!
