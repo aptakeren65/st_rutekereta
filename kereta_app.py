@@ -1,8 +1,8 @@
-import heapq
 import streamlit as st
+import heapq
 
 # --- 1. PENGATURAN HALAMAN & TEMA WARNA PINK (CSS INJECTION) ---
-st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta ")
+st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
 
 # Injeksi CSS Custom untuk Tema Pink
 st.markdown(
@@ -68,7 +68,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("🚇 Train Route Planner ")
+st.title("🚇 Train Route Planner")
 st.write("Navigasi Jalur Kereta Api Indonesia")
 st.markdown("---")
 
@@ -131,10 +131,16 @@ if "graph_kereta" not in st.session_state:
 
 graph = st.session_state.graph_kereta
 
-# --- 4. PEMBUATAN 5 MENU UTAMA (TABS) ---
+
+# --- 4. PEMBUATAN 4 MENU UTAMA (TABS) ---
+# Di sini jumlah variabel (4) sudah sama dengan jumlah nama menu (4)
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📍 Cari Rute", "🗺️ Jaringan Rel", "📊 Statistik"
+    "📍 Cari Rute", 
+    "🗺️ Jaringan Rel", 
+    "⚙️ Kendali Data", 
+    "📊 Analisis Jaringan"
 ])
+
 
 # ==================== MENU 1: CARI RUTE ====================
 with tab1:
@@ -182,8 +188,9 @@ with tab1:
                     st.error("Jalur tidak terhubung.")
                 else:
                     st.balloons()
-                    st.success(f" Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
+                    st.success(f"Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
                     st.info(" ➔ ".join([f"**{s}**" for s in path]))
+
 
 # ==================== MENU 2: JARINGAN REL ====================
 with tab2:
@@ -198,9 +205,10 @@ with tab2:
         target_col = col_a if i % 2 == 0 else col_b
         target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km)")
 
+
 # ==================== MENU 3: CRUD PANEL ====================
 with tab3:
-    st.subheader("⚙️Kendali Data ")
+    st.subheader("⚙️ Kendali Data")
     c1, c2, c3 = st.columns(3)
     
     # Create
@@ -241,6 +249,7 @@ with tab3:
                 a_d, t_d = d_sel.split("-")
                 graph.hapus_rute(a_d, t_d)
                 st.rerun()
+
 
 # ==================== MENU 4: ANALISIS ====================
 with tab4:
