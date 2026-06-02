@@ -1,55 +1,53 @@
 import heapq
 import streamlit as st
 
-# --- 1. PENGATURAN HALAMAN & TEMA GAMBAR LATAR (CSS INJECTION) ---
+# --- 1. PENGATURAN HALAMAN ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
 
-# Injeksi CSS Custom untuk Background Gambar Kereta Bermutu Tinggi + Efek Blur Cinematik
+# Injeksi CSS Super Kuat (Menggunakan Selektor Global Paksa)
 st.markdown(
     """
     <style>
-    /* 1. Latar Belakang Halaman Utama Menggunakan Gambar Kereta Api Dengan Overlay Gelap */
-    .stApp {
-        background: linear-gradient(rgba(11, 25, 44, 0.85), rgba(11, 25, 44, 0.85)), 
-                    url("https://images.unsplash.com/photo-1532103054090-334e6e60ab29?q=80&w=2070") no-repeat center center fixed;
-        background-size: cover;
+    /* Mengunci background secara mutlak di lapisan paling belakang */
+    html, body, [data-testid="stAppViewContainer"] {
+        background: linear-gradient(rgba(11, 25, 44, 0.82), rgba(11, 25, 44, 0.82)), 
+                    url("https://images.unsplash.com/photo-1532103054090-334e6e60ab29?q=80&w=2070") no-repeat center center fixed !important;
+        background-size: cover !important;
+    }
+
+    /* Efek Blur pada Glassmorphism Konten Utama */
+    [data-testid="stHeader"], [data-testid="stAppViewContainer"] {
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
     }
     
-    /* Efek tambahan agar seluruh kontainer aplikasi terasa nge-blur lembut di latar belakang */
-    .stAppBlockContainer {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-    
-    /* 2. Warna Judul Utama dan Subheader (Ice Blue / Cyan Soft) */
+    /* Warna Judul Utama dan Subheader */
     h1, h2, h3, h4 {
         color: #00D2C4 !important;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        font-weight: bold !important;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     }
     
-    /* Warna teks deskripsi bawaan agar kontras di latar belakang gelap */
-    p, b, span, label {
-        color: #E0E7FF !important;
+    /* Memaksa Semua Teks Standar Menjadi Terang */
+    p, b, span, label, .stWidgetLabel p {
+        color: #E2E8F0 !important;
     }
 
-    /* 3. Desain Kartu pada Tabs (Semi-Transparan Dark Blue agar menyatu dengan BG) */
+    /* Desain Kartu pada Tabs (Transparan Gelap & Estetik) */
     .stTabs [data-baseweb="tab-panel"] {
-        background-color: rgba(30, 62, 98, 0.75);
+        background-color: rgba(15, 32, 67, 0.75) !important;
         padding: 30px;
         border-radius: 20px;
-        border: 2px solid rgba(0, 210, 196, 0.5);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(0, 210, 196, 0.4) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
         margin-top: 15px;
-        backdrop-filter: blur(4px);
     }
 
-    /* 4. Styling Tab Menu */
+    /* Styling Menu Tab */
     button[data-baseweb="tab"] {
-        font-size: 18px;
-        font-weight: bold;
+        font-size: 18px !important;
+        font-weight: bold !important;
         color: #94A3B8 !important;
-        background-color: transparent !important;
     }
     
     button[aria-selected="true"] {
@@ -57,29 +55,25 @@ st.markdown(
         border-bottom-color: #00D2C4 !important;
     }
 
-    /* 5. Custom Button (Neon Cyan/Blue Gradient) */
+    /* Tombol Utama (Cyan) */
     .stButton>button {
-        background-color: #00D2C4;
+        background-color: #00D2C4 !important;
         color: #0B192C !important;
-        border-radius: 12px;
-        border: none;
-        transition: 0.3s;
-        font-weight: bold;
-        box-shadow: 0 4px 10px rgba(0, 210, 196, 0.2);
+        border-radius: 12px !important;
+        border: none !important;
+        font-weight: bold !important;
     }
     
     .stButton>button:hover {
-        background-color: #00F5E6;
-        border: none;
-        color: #0B192C !important;
-        box-shadow: 0 4px 20px rgba(0, 210, 196, 0.6);
+        background-color: #00F5E6 !important;
+        box-shadow: 0 0 15px rgba(0, 210, 196, 0.6) !important;
     }
     
-    /* 6. Info & Success Box Custom Color (Semi-Transparan) */
+    /* Box Peringatan / Info */
     .stAlert {
-        border-radius: 15px;
-        border: 1px solid rgba(0, 210, 196, 0.5);
-        background-color: rgba(11, 25, 44, 0.8);
+        border-radius: 15px !important;
+        border: 1px solid rgba(0, 210, 196, 0.4) !important;
+        background-color: rgba(11, 25, 44, 0.85) !important;
     }
     </style>
     """,
