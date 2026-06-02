@@ -3,7 +3,7 @@ import streamlit as st
 import random
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
-st.set_page_config(layout="wide", page_title="Sistem Navigasi & Tiket Kereta")
+st.set_page_config(layout="wide", page_title="SAS KERETA API")
 
 # Injeksi CSS Custom untuk Background Gambar Kereta + Efek Blur + Glassmorphism Card
 st.markdown(
