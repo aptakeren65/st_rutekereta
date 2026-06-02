@@ -359,7 +359,7 @@ with tab5:
     
     if kepadatan_persen < 45:
         status_teks = "🟢 SEPI / LANCAR AMAN"
-        tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antre."
+        tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antri."
     elif kepadatan_persen < 75:
         status_teks = "🟡 CUKUP PADAT / RAMAI"
         tips = "Volume penumpang sedang meningkat. Harap datang 30 menit lebih awal sebelum jam keberangkatan."
