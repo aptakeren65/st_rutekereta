@@ -347,8 +347,8 @@ with tab4:
 
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
 with tab5:
-    st.subheader("🎰 Live Traffic ")
-    st.write(" untuk memantau status keramaian dan lalu lintas stasiun.")
+    st.subheader("🎰 Live Traffic")
+    st.write("Memantau status keramaian dan lalu lintas stasiun.")
     
     st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
@@ -357,33 +357,48 @@ with tab5:
     jumlah_penumpang = random.randint(120, 2500)
     jumlah_antrean = random.randint(1, 12)
     
+    # Menentukan status, tips, dan tipe alert berdasarkan tingkat kepadatan persen
     if kepadatan_persen < 45:
-        status_teks = "🟢 SEPI / LANCAR AMAN"
+        status_teks = "🟢 SANGAT LANCAR / SEPI"
         tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antri."
+        tipe_kondisi = "lancar"
     elif kepadatan_persen < 75:
         status_teks = "🟡 CUKUP PADAT / RAMAI"
         tips = "Volume penumpang sedang meningkat. Harap datang 30 menit lebih awal sebelum jam keberangkatan."
+        tipe_kondisi = "ramai"
     else:
         status_teks = "🔴 MACET TOTAL / SANGAT PADAT"
-        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah! Antrean boarding mengular. Disarankan segera menuju stasiun sekarang."
+        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah!. Disarankan segera menuju stasiun sekarang."
+        tipe_kondisi = "macet"
 
+    # Menampilkan 3 Metrik Utama di Atas
     col_s1, col_s2, col_s3 = st.columns(3)
     with col_s1:
         st.metric(label="Status Arus Lalu Lintas", value=status_teks)
     with col_s2:
         st.metric(label="Estimasi Penumpang Aktif", value=f"{jumlah_penumpang} Orang")
     with col_s3:
-        st.metric(label="Jumlah Kereta Bersandar/Antri", value=f"{jumlah_antrean} KA")
+        st.metric(label="Jumlah Kereta Bersandar/Antre", value=f"{jumlah_antrean} KA")
         
+    st.write("---")
     st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
-    st.progress(kepadatan_persen / 1000)
-    st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
+    st.progress(kepadatan_persen / 100)
+    st.write(f"Tingkat keterisian area tunggu saat ini: **{kepadatan_persen}%**")
     
+    # BOX NOTIFIKASI DINAMIS: Mengubah gaya tampilan sesuai kondisi kepadatan
+    if tipe_kondisi == "lancar":
+        st.success(f"💡 **Status Stasiun {st_pilih_simulasi}: Sangat Lancar.** {tips}")
+    elif tipe_kondisi == "ramai":
+        st.warning(f"⚠️ **Status Stasiun {st_pilih_simulasi}: Cukup Padat.** {tips}")
+    else:
+        st.error(f"🚨 **Status Stasiun {st_pilih_simulasi}: Sangat Padat / Overload!** {tips}")
+
+    # Tambahan Banner Rekomendasi Estetik di bawahnya
     st.markdown(
         f"""
         <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
-            <b style="color: #00D2C4;">📢 Rekomendasi Dari Kami Stasiun {st_pilih_simulasi}:</b><br>
-            <span style="font-size: 14px; color: #E2E8F0;">{tips}</span>
+            <b style="color: #00D2C4;">📢 Rekomendasi Dari Kami Untuk Stasiun {st_pilih_simulasi}:</b><br>
+            <span style="font-size: 14px; color: #E2E8F0;">Sistem mendeteksi bahwa tingkat keramaian menyentuh angka {kepadatan_persen}%. Tetap jaga barang bawaan Anda dan utamakan keselamatan keselamatan di area peron.</span>
         </div>
         """, unsafe_allow_html=True
     )
