@@ -1,34 +1,39 @@
-import streamlit as st
 import heapq
+import streamlit as st
 
 # --- 1. PENGATURAN HALAMAN & TEMA WARNA PINK (CSS INJECTION) ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
 
-# Injeksi CSS Custom untuk Tema Pink
+# Injeksi CSS Custom untuk Tema Pink dengan Latar Belakang Bintik-Bintik (Polkadot)
 st.markdown(
     """
     <style>
-    /* 1. Latar Belakang Halaman Utama (Soft Pink) */
+    /* 1. Latar Belakang Halaman Utama dengan Pola Bintik-Bintik Halus */
     .stApp {
         background-color: #fff0f6;
+        background-image: radial-gradient(#ffccdb 15%, transparent 16%),
+                          radial-gradient(#ffccdb 15%, transparent 16%);
+        background-size: 30px 30px;
+        background-position: 0 0, 15px 15px;
     }
     
     /* 2. Warna Judul dan Teks Utama (Deep Pink / Rose) */
     h1, h2, h3, h4 {
         color: #d63384 !important;
+        font-weight: bold;
     }
     
     p, b, span {
         color: #495057;
     }
 
-    /* 3. Desain Kartu pada Tabs (White with Pink Border) */
+    /* 3. Desain Kartu pada Tabs (White dengan Kontras Border Pink) */
     .stTabs [data-baseweb="tab-panel"] {
         background-color: #ffffff;
         padding: 30px;
         border-radius: 20px;
         border: 2px solid #fcc2d7;
-        box-shadow: 0 10px 15px rgba(214, 51, 132, 0.05);
+        box-shadow: 0 10px 20px rgba(214, 51, 132, 0.08);
         margin-top: 15px;
     }
 
@@ -50,18 +55,21 @@ st.markdown(
         border-radius: 12px;
         border: none;
         transition: 0.3s;
+        font-weight: bold;
     }
     
     .stButton>button:hover {
         background-color: #d63384;
         border: none;
         color: white !important;
+        box-shadow: 0 4px 10px rgba(214, 51, 132, 0.2);
     }
     
     /* 6. Info & Success Box Custom Color */
     .stAlert {
         border-radius: 15px;
         border: 1px solid #fcc2d7;
+        background-color: #fff5f5;
     }
     </style>
     """,
@@ -133,7 +141,6 @@ graph = st.session_state.graph_kereta
 
 
 # --- 4. PEMBUATAN 4 MENU UTAMA (TABS) ---
-# Di sini jumlah variabel (4) sudah sama dengan jumlah nama menu (4)
 tab1, tab2, tab3, tab4 = st.tabs([
     "📍 Cari Rute", 
     "🗺️ Jaringan Rel", 
@@ -187,7 +194,7 @@ with tab1:
                 if dist[st_tujuan] == float("inf"):
                     st.error("Jalur tidak terhubung.")
                 else:
-                    st.balloons()
+                    # Efek st.balloons() sudah dihapus di sini agar loading lebih clean
                     st.success(f"Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
                     st.info(" ➔ ".join([f"**{s}**" for s in path]))
 
