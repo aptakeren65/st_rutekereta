@@ -76,28 +76,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- JUDUL UTAMA & COMPONENT TABEL ---
 st.title("🚇 Train Route Planner")
 st.write("Navigasi Jalur Kereta Api Indonesia")
-
-# Penambahan Tabel Deskripsi/Identitas tepat di bawah judul
-informasi_aplikasi = {
-    "Detail Proyek": [
-        "Aplikasi",
-        "NIM Akhir Mahasiswa",
-        "Algoritma Pencarian Rute",
-        "Struktur Data",
-        "Tema Tampilan"
-    ],
-    "Informasi": [
-        "Sistem Navigasi Jalur Kereta Api",
-        "056",
-        "Dijkstra Algorithm",
-        "Graph (Adjacency List dengan Heap/Priority Queue)",
-        "Soft Pink Polkadot Pattern"
-    ]
-}
-st.table(informasi_aplikasi)
 st.markdown("---")
 
 
@@ -214,6 +194,7 @@ with tab1:
                 if dist[st_tujuan] == float("inf"):
                     st.error("Jalur tidak terhubung.")
                 else:
+                    # Efek st.balloons() sudah dihapus di sini agar loading lebih clean
                     st.success(f"Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
                     st.info(" ➔ ".join([f"**{s}**" for s in path]))
 
