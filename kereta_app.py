@@ -1,6 +1,8 @@
 import heapq
 import streamlit as st
 import random
+import pandas as pd
+import numpy as np
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi & Tiket Kereta")
@@ -207,7 +209,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🎫 Pesan Tiket Mandiri", 
     "🕒 Jadwal Kereta",
     "🎰 Live Traffic Simulator",
-    "🗺️ Peta & Jalur Tercepat"
+    "🗺️ Peta Jaringan Radar"
 ])
 
 
@@ -222,7 +224,7 @@ with tab1:
 
     if st.button("Mulai Hitung Navigasi", type="primary", key="btn_nav"):
         if st_asal == st_tujuan:
-            st.warning("Stasiun asal dan tujuan tidak boleh sama!")
+            st.warning("Stasiun asal and tujuan tidak boleh sama!")
         else:
             jarak, jalur = hitung_dijkstra(st_asal, st_tujuan)
             if jarak == float("inf"):
@@ -338,14 +340,13 @@ with tab4:
     st.table(data_jadwal)
 
 
-# ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN (MENARIK/BARU) ====================
+# ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
 with tab5:
     st.subheader("🎰 Live Traffic & Simulator Kepadatan Stasiun")
     st.write("Gunakan simulator ini untuk memantau status keramaian dan lalu lintas stasiun secara real-time.")
     
     st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
-    # Membuat data simulasi dinamis acak berbasis nama stasiun agar interaktif
     random.seed(len(st_pilih_simulasi) * 42)
     kepadatan_persen = random.randint(15, 100)
     jumlah_penumpang = random.randint(120, 2500)
@@ -353,18 +354,14 @@ with tab5:
     
     if kepadatan_persen < 45:
         status_teks = "🟢 SEPI / LANCAR AMAN"
-        status_warna = "green"
         tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antre."
     elif kepadatan_persen < 75:
         status_teks = "🟡 CUKUP PADAT / RAMAI"
-        status_warna = "orange"
         tips = "Volume penumpang sedang meningkat. Harap datang 30 menit lebih awal sebelum jam keberangkatan."
     else:
         status_teks = "🔴 MACET TOTAL / SANGAT PADAT"
-        status_warna = "red"
         tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah! Antrean boarding mengular. Disarankan segera menuju stasiun sekarang."
 
-    # Visualisasi Dashboard Interaktif Kecil
     col_s1, col_s2, col_s3 = st.columns(3)
     with col_s1:
         st.metric(label="Status Arus Lalu Lintas", value=status_teks)
@@ -377,7 +374,6 @@ with tab5:
     st.progress(kepadatan_persen / 100)
     st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
     
-    # Kotak Informasi Tips Visual
     st.markdown(
         f"""
         <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
@@ -388,14 +384,16 @@ with tab5:
     )
 
 
-# ==================== MENU 6: PETA & JALUR TERCEPAT ====================
+# ==================== MENU 6: PETA JARINGAN RADAR INTERAKTIF (VISUAL BARU) ====================
 with tab6:
-    st.subheader("🗺️ Jaringan Rel Aktif & Jalur Tercepat Global")
-    
+    st.subheader("🗺️ Peta Distribusi & Radar Jaringan Jalur Rel")
+    st.write("Visualisasi letak persebaran node stasiun dan status operasional infrastruktur rel langsung.")
+
+    # Pemrosesan Data Grafik Rel Langsung Tercepat Global
     rute_tercepat_global = ""
     jarak_terpendek_global = float("inf")
-    
     data_j = []
+    
     for s, t_list in graph.edges.items():
         for t, j in t_list:
             if (t, s, j) not in data_j: 
@@ -403,18 +401,65 @@ with tab6:
                 if j < jarak_terpendek_global:
                     jarak_terpendek_global = j
                     rute_tercepat_global = f"{s} ↔️ {t}"
-                    
+
+    # Banner Sorotan Jalur Utama
     st.markdown(
         f"""
-        <div style="background-color: rgba(0, 210, 196, 0.15); padding: 20px; border-radius: 12px; border-left: 5px solid #00D2C4; margin-bottom: 25px;">
-            <b style="color: #00D2C4; font-size: 16px;">⚡ Koneksi Rel Langsung Tercepat se-Nasional:</b><br>
-            <span style="font-size: 24px; font-weight: bold;">{rute_tercepat_global}</span> hanya berjarak <span style="color:#00D2C4; font-weight:bold;">{jarak_terpendek_global} KM</span> (Estimasi Waktu Tempuh: {hitung_estimasi_waktu(jarak_terpendek_global)}).
+        <div style="background-color: rgba(0, 210, 196, 0.15); padding: 18px; border-radius: 12px; border-left: 5px solid #00D2C4; margin-bottom: 25px;">
+            <b style="color: #00D2C4; font-size: 15px;">⚡ Koridor Jalur Rel Tercepat Saat Ini:</b><br>
+            <span style="font-size: 20px; font-weight: bold;">{rute_tercepat_global}</span> ({jarak_terpendek_global} KM — Estimasi Waktu Tempuh: {hitung_estimasi_waktu(jarak_terpendek_global)})
         </div>
         """, unsafe_allow_html=True
     )
+
+    # --- MEMBUAT SIMULASI PETA KOORDINAT INTERAKTIF (SCATTER CHART) ---
+    # Membuat koordinat tiruan statis agar bentuk letak stasiun tetap konsisten
+    np.random.seed(101)
+    koordinat_stasiun = {
+        name: [np.random.uniform(106.0, 114.0), np.random.uniform(-8.0, -6.0)] 
+        for name in daftar_stasiun
+    }
     
-    st.write("📋 **Daftar Lengkap Seluruh Panjang Jalur Rel Antarkota:**")
-    col_a, col_b = st.columns(2)
-    for i, (a, b, j) in enumerate(sorted(data_j)):
-        target_col = col_a if i % 2 == 0 else col_b
-        target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km) — *Estimasi: {hitung_estimasi_waktu(j)}*")
+    # Bungkus koordinat ke dalam Pandas DataFrame untuk Streamlit Chart
+    map_data = []
+    for name in daftar_stasiun:
+        lon, lat = koordinat_stasiun[name]
+        # Berikan status acak untuk menambah estetika radar visual
+        status_ops = random.choice(["🟢 Active Trunk", "🟢 Active Trunk", "🔵 Under Maintenance"])
+        map_data.append({"Stasiun": name, "Longitude X": lon, "Latitude Y": lat, "Type": status_ops})
+        
+    df_map = pd.DataFrame(map_data)
+    
+    # Layout Kolom Kiri Gambar Grafis Radar & Kolom Kanan List Status Tabel Rute
+    col_graph, col_list_rute = st.columns([3, 2])
+    
+    with col_graph:
+        st.write("📊 **Radar Simpul Node Koordinat Geometris Jalur Rel:**")
+        # Menampilkan Scatter Chart interaktif bawaan Streamlit
+        st.scatter_chart(
+            df_map, 
+            x="Longitude X", 
+            y="Latitude Y", 
+            color="Type", 
+            size=150, 
+            height=320,
+            use_container_width=True
+        )
+        st.caption("💡 *Arahkan kursor pada bulatan titik di atas untuk melihat nama stasiun secara instan.*")
+
+    with col_list_rute:
+        st.write("📋 **Status Infrastruktur Jalur Rel Aktif:**")
+        
+        # Buat visualisasi list berbentuk tabel status yang menarik
+        tabel_data = []
+        for i, (a, b, j) in enumerate(sorted(data_j)):
+            # Tentukan status jalur acak yang konsisten berdasarkan indeks
+            status_rel = "✅ NORMAL" if i % 4 != 0 else "⚠️ PERBAIKAN"
+            tabel_data.append({
+                "Koridor Rel": f"{a} ↔️ {b}",
+                "Jarak": f"{j} KM",
+                "Waktu": hitung_estimasi_waktu(j),
+                "Kondisi": status_rel
+            })
+            
+        st.dataframe(pd.DataFrame(tabel_data), hide_index=True, use_container_width=True, height=290)
