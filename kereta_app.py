@@ -357,23 +357,23 @@ with tab5:
     # Total ada 13 stasiun aktif di dalam graph program kita
     status_preset = {
         # --- 4 STASIUN KUNING (CUKUP PADAT) ---
-        "Bandung": {"persen": 65, "penumpang": 1200, "antrean": 4, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
-        "Semarang": {"persen": 58, "penumpang": 950, "antrean": 3, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
-        "Yogyakarta": {"persen": 70, "penumpang": 1650, "antrean": 5, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
-        "Cirebon": {"persen": 50, "penumpang": 780, "antrean": 2, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
+        "Bandung": {"persen": 65, "penumpang": 1200, "antrean": 4, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
+        "Semarang": {"persen": 58, "penumpang": 950, "antrean": 3, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
+        "Yogyakarta": {"persen": 70, "penumpang": 1650, "antrean": 5, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
+        "Cirebon": {"persen": 50, "penumpang": 780, "antrean": 2, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
         
         # --- 3 STASIUN MERAH (SANGAT PADAT) ---
-        "Malang": {"persen": 92, "penumpang": 2100, "antrean": 8, "teks": "🔴 MACET TOTAL / SANGAT PADAT", "alert": "macet"},
-        "Jakarta": {"persen": 96, "penumpang": 2450, "antrean": 11, "teks": "🔴 MACET TOTAL / SANGAT PADAT", "alert": "macet"},
-        "Surabaya": {"persen": 88, "penumpang": 1980, "antrean": 7, "teks": "🔴 MACET TOTAL / SANGAT PADAT", "alert": "macet"},
+        "Malang": {"persen": 92, "penumpang": 2100, "antrean": 8, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
+        "Jakarta": {"persen": 96, "penumpang": 2450, "antrean": 11, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
+        "Surabaya": {"persen": 88, "penumpang": 1980, "antrean": 7, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
         
         # --- 6 STASIUN HIJAU (SANGAT LANCAR) ---
-        "Banyuwangi": {"persen": 25, "penumpang": 220, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
-        "Tangerang": {"persen": 25, "penumpang":230, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
-        "Lampung": {"persen": 30, "penumpang": 340, "antrean": 2, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
-        "Makassar": {"persen": 20, "penumpang": 180, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
-        "Palembang": {"persen": 28, "penumpang": 290, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
-        "Parepare": {"persen": 18, "penumpang": 140, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"}
+        "Banyuwangi": {"persen": 25, "penumpang": 220, "antrean": 1, "teks": "🟢 SANGAT LANCAR", "alert": "lancar"},
+        "Tangerang": {"persen": 25, "penumpang":230, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
+        "Lampung": {"persen": 30, "penumpang": 340, "antrean": 2, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
+        "Makassar": {"persen": 20, "penumpang": 180, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
+        "Palembang": {"persen": 28, "penumpang": 290, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
+        "Parepare": {"persen": 18, "penumpang": 140, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"}
     }
     
     # Ambil data berdasarkan stasiun yang dipilih (jika tidak terdaftar, default ke lancar)
