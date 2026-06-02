@@ -348,42 +348,62 @@ with tab4:
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
 with tab5:
     st.subheader("🎰 Live Traffic")
-    st.write("Memantau status keramaian dan lalu lintas stasiun secara real-time.")
+    st.write("Memantau status keramaian dan lalu lintas stasiun ")
     
     # 1. Pilihan Stasiun
     st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
-    # PERBAIKAN: Menggunakan hash() agar variasi tingkat kepadatan tiap stasiun berbeda-beda dan unik
-    random.seed(hash(st_pilih_simulasi))
-    kepadatan_persen = random.randint(15, 100)
-    jumlah_penumpang = random.randint(120, 2500)
-    jumlah_antrean = random.randint(1, 12)
+    # 2. PENGUNCIAN STATUS SESUAI REQUEST (4 Kuning, 3 Merah, 6 Hijau)
+    # Total ada 13 stasiun aktif di dalam graph program kita
+    status_preset = {
+        # --- 4 STASIUN KUNING (CUKUP PADAT) ---
+        "Bandung": {"persen": 65, "penumpang": 1200, "antrean": 4, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
+        "Semarang": {"persen": 58, "penumpang": 950, "antrean": 3, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
+        "Yogyakarta": {"persen": 70, "penumpang": 1650, "antrean": 5, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
+        "Cirebon": {"persen": 50, "penumpang": 780, "antrean": 2, "teks": "🟡 CUKUP PADAT / RAMAI", "alert": "ramai"},
+        
+        # --- 3 STASIUN MERAH (SANGAT PADAT) ---
+        "Malang": {"persen": 92, "penumpang": 2100, "antrean": 8, "teks": "🔴 MACET TOTAL / SANGAT PADAT", "alert": "macet"},
+        "Jakarta": {"persen": 96, "penumpang": 2450, "antrean": 11, "teks": "🔴 MACET TOTAL / SANGAT PADAT", "alert": "macet"},
+        "Surabaya": {"persen": 88, "penumpang": 1980, "antrean": 7, "teks": "🔴 MACET TOTAL / SANGAT PADAT", "alert": "macet"},
+        
+        # --- 6 STASIUN HIJAU (SANGAT LANCAR) ---
+        "Banyuwangi": {"persen": 25, "penumpang": 220, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
+        "Tangerang": {"persen": 25, "penumpang":230, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
+        "Lampung": {"persen": 30, "penumpang": 340, "antrean": 2, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
+        "Makassar": {"persen": 20, "penumpang": 180, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
+        "Palembang": {"persen": 28, "penumpang": 290, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"},
+        "Parepare": {"persen": 18, "penumpang": 140, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"}
+    }
     
-    if kepadatan_persen < 40:
-        status_teks = "🟢 SANGAT LANCAR / SEPI"
+    # Ambil data berdasarkan stasiun yang dipilih (jika tidak terdaftar, default ke lancar)
+    data_stasiun = status_preset.get(st_pilih_simulasi, {"persen": 30, "penumpang": 300, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"})
+    
+    kepadatan_persen = data_stasiun["persen"]
+    jumlah_penumpang = data_stasiun["penumpang"]
+    jumlah_antrean = data_stasiun["antrean"]
+    status_teks = data_stasiun["teks"]
+    warna_alert = data_stasiun["alert"]
+    
+    # Menentukan teks tips rekomendasi
+    if warna_alert == "lancar":
         tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antri."
-        warna_alert = "lancar"
-    elif kepadatan_persen < 75:
-        status_teks = "🟡 CUKUP PADAT / RAMAI"
+    elif warna_alert == "ramai":
         tips = "Volume penumpang sedang meningkat. Harap datang 30 menit lebih awal sebelum jam keberangkatan."
-        warna_alert = "ramai"
     else:
-        status_teks = "🔴 MACET TOTAL / SANGAT PADAT"
-        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah! Antrean boarding mengular. Disarankan segera menuju stasiun."
-        warna_alert = "macet"
+        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah!. Disarankan segera menuju stasiun."
 
-    # 2. SEKAT KUNING / INDIKATOR STATUS (Tepat di antara stasiun dan metrik)
+    # 3. SEKAT WARNA DINAMIS (Tepat di antara stasiun dan metrik)
     st.write("") 
     if warna_alert == "lancar":
         st.success(f"🟢 **Status Stasiun {st_pilih_simulasi}:** Saat ini terpantau sangat lancar dan sepi.")
     elif warna_alert == "ramai":
-        # Kotak peringatan kuning ini sekarang akan muncul di stasiun yang tingkat kepadatannya sedang
         st.warning(f"🟡 **Perhatian:** Stasiun {st_pilih_simulasi} dalam kondisi cukup padat/ramai.")
     else:
         st.error(f"🚨 **Peringatan:** Stasiun {st_pilih_simulasi} dalam kondisi macet total/sangat padat!")
     st.write("")
 
-    # 3. Hasil Metrik Kepadatan
+    # 4. Hasil Metrik Kepadatan
     col_s1, col_s2, col_s3 = st.columns(3)
     with col_s1:
         st.metric(label="Status Arus Lalu Lintas", value=status_teks)
@@ -397,16 +417,15 @@ with tab5:
     st.progress(kepadatan_persen / 100)
     st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
     
-    # 4. Kotak Rekomendasi Detail Akhir
+    # 5. Kotak Rekomendasi Detail Akhir
     st.markdown(
         f"""
         <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
-            <b style="color: #00D2C4;">📢 Rekomendasi Dari Kami Untuk Stasiun {st_pilih_simulasi}:</b><br>
+            <b style="color: #00D2C4;">📢 Rekomendasi Dari Kami Stasiun {st_pilih_simulasi}:</b><br>
             <span style="font-size: 14px; color: #E2E8F0;">{tips}</span>
         </div>
         """, unsafe_allow_html=True
     )
-
 
 # ==================== MENU 6: PAPAN KARTU INFORMASI RUTE ====================
 with tab6:
