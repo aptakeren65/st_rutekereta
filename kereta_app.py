@@ -160,7 +160,7 @@ if "graph_kereta" not in st.session_state:
         ("Cirebon", "Semarang", 228), ("Semarang", "Yogyakarta", 144),
         ("Semarang", "Surabaya", 350), ("Yogyakarta", "Surabaya", 330),
         ("Surabaya", "Malang", 90), ("Surabaya", "Banyuwangi", 285),
-        ("Medan", "Binjai", 22), ("Palembang", "Lampung", 389),
+        ("Tangerang", "Jakarta", 37), ("Palembang", "Lampung", 389),
         ("Makassar", "Parepare", 145), ("Banyuwangi", "Makassar", 820)
     ]
     for asal_st, tujuan_st, jarak_st in rute_nasional:
