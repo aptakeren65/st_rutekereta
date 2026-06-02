@@ -156,10 +156,10 @@ if "graph_kereta" not in st.session_state:
     geo_graph = GraphKereta()
     rute_nasional = [
         ("Jakarta", "Bandung", 150), ("Jakarta", "Cirebon", 210),
-        ("Bandung", "Cirebon", 130), ("Bandung", "Yogyakarta", 400),
-        ("Cirebon", "Semarang", 230), ("Semarang", "Yogyakarta", 120),
+        ("Bandung", "Cirebon", 139), ("Bandung", "Yogyakarta", 495),
+        ("Cirebon", "Semarang", 228), ("Semarang", "Yogyakarta", 144),
         ("Semarang", "Surabaya", 350), ("Yogyakarta", "Surabaya", 330),
-        ("Surabaya", "Malang", 90), ("Surabaya", "Banyuwangi", 290),
+        ("Surabaya", "Malang", 90), ("Surabaya", "Banyuwangi", 285),
         ("Medan", "Binjai", 22), ("Palembang", "Lampung", 389),
         ("Makassar", "Parepare", 145), ("Banyuwangi", "Makassar", 820)
     ]
@@ -212,18 +212,18 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
 
 # --- 4. PEMBUATAN MENU UTAMA (6 TABS) ---
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "📍 Cari Rute Terbaik", 
+    "📍 Cari Rute ", 
     "⏱️ Estimasi Waktu", 
     "🎫 Pesan Tiket Mandiri", 
     "🕒 Jadwal Kereta",
     "🎰 Live Traffic Simulator",
-    "🗂️ Papan Kartu Informasi Rute"
+    "🗂️ Papan Kartu Informasi"
 ])
 
 
 # ==================== MENU 1: CARI RUTE TERBAIK ====================
 with tab1:
-    st.subheader("📍 Optimasi Jalur Kereta Terpendek")
+    st.subheader("📍 Optimasi Jalur Kereta")
     col_asal, col_tujuan = st.columns(2)
     with col_asal:
         st_asal = st.selectbox("Titik Keberangkatan:", daftar_stasiun, key="rute_asal")
@@ -238,14 +238,14 @@ with tab1:
             if jarak == float("inf"):
                 st.error("Maaf, jalur rel antarkota tersebut belum terhubung.")
             else:
-                st.success(f"🏁 Rute Terbaik Ditemukan! Total Jarak Tempuh: {jarak} KM")
+                st.success(f"🏁 Rute Ditemukan! Total Jarak Tempuh: {jarak} KM")
                 st.info(" ➔ ".join([f"**{s}**" for s in jalur]))
 
 
 # ==================== MENU 2: ESTIMASI WAKTU PERJALANAN ====================
 with tab2:
-    st.subheader("⏱️ Kalkulator Estimasi Waktu Perjalanan Riil")
-    st.write("Hitung berapa lama waktu yang kamu butuhkan berdasarkan kecepatan laju kereta api.")
+    st.subheader("⏱️Estimasi Waktu Perjalanan")
+    st.write("berapa lama waktu yang kamu butuhkan berdasarkan kecepatan laju kereta api.")
     
     col_est1, col_est2 = st.columns(2)
     with col_est1:
@@ -254,7 +254,7 @@ with tab2:
     with col_est2:
         kecepatan_pilihan = st.slider("Atur Kecepatan Rata-Rata Kereta (KM/Jam):", min_value=50, max_value=120, value=80, step=5)
 
-    if st.button("Hitung Estimasi Durasi", type="primary", key="btn_estimasi"):
+    if st.button("Hitung Durasi", type="primary", key="btn_estimasi"):
         if st_est_asal == st_est_tujuan:
             st.warning("Stasiun asal dan tujuan tidak boleh sama!")
         else:
@@ -301,7 +301,7 @@ with tab3:
                     st.markdown(
                         f"""
                         <div class="ticket-box">
-                            <h3 style='color: #00D2C4; margin-top:0;'>PT KERETA API INDONESIA - E-TICKET</h3>
+                            <h3 style='color: #00D2C4; margin-top:0;'>SAS KERETA API INDONESIA - E-TICKET</h3>
                             <hr style='border-color: rgba(0, 210, 196, 0.3);'>
                             <table style='width:100%; border:none; font-size:15px; color:#E2E8F0;'>
                                 <tr><td><b>Kode Booking</b></td><td>: <span style='color:#00D2C4; font-weight:bold;'>{kode_booking}</span></td></tr>
@@ -311,7 +311,7 @@ with tab3:
                                 <tr><td><b>Tanggal / Kursi</b></td><td>: {tanggal_perjalanan} / Kursi {posisi_kursi}</td></tr>
                                 <tr><td><b>Kelas & Tarif</b></td><td>: {kelas_ka} - <b>Rp {total_harga:,.0f}</b></td></tr>
                             </table>
-                            <p style='font-size:11px; color:#94A3B8; margin-top:15px; text-align:center;'>*Tunjukkan kode booking ini saat melakukan boarding di stasiun mandiri.</p>
+                            <p style='font-size:11px; color:#94A3B8; margin-top:15px; text-align:center;'>*Tunjukkan kode booking ini saat melakukan boarding di stasiun.</p>
                         </div>
                         """, 
                         unsafe_allow_html=True
@@ -333,8 +333,6 @@ with tab4:
     tujuan_tersedia = [tujuan for tujuan, _ in graph.edges.get(st_pilih_jadwal, [])]
     if not tujuan_tersedia:
         tujuan_tersedia = [s for s in daftar_stasiun if s != st_pilih_jadwal]
-
-    st.write("📋 **Live Boarding Schedule:**")
     
     for i in range(4): 
         nama_ka = kereta_list[(len(st_pilih_jadwal) + i) % len(kereta_list)]
@@ -349,8 +347,8 @@ with tab4:
 
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
 with tab5:
-    st.subheader("🎰 Live Traffic & Simulator Kepadatan Stasiun")
-    st.write("Gunakan simulator ini untuk memantau status keramaian dan lalu lintas stasiun secara real-time.")
+    st.subheader("🎰 Live Traffic ")
+    st.write("ini untuk memantau status keramaian dan lalu lintas stasiun.")
     
     st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
@@ -384,7 +382,7 @@ with tab5:
     st.markdown(
         f"""
         <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
-            <b style="color: #00D2C4;">📢 Rekomendasi Sistem untuk Stasiun {st_pilih_simulasi}:</b><br>
+            <b style="color: #00D2C4;">📢 Rekomendasi Dari Kami Stasiun {st_pilih_simulasi}:</b><br>
             <span style="font-size: 14px; color: #E2E8F0;">{tips}</span>
         </div>
         """, unsafe_allow_html=True
@@ -393,8 +391,8 @@ with tab5:
 
 # ==================== MENU 6: PAPAN KARTU INFORMASI RUTE ====================
 with tab6:
-    st.subheader("🗂️ Papan Kartu Informasi Jaringan Rel")
-    st.write("Daftar lengkap seluruh koneksi rel langsung antarkota yang dikemas dalam bentuk kartu informasi terorganisir.")
+    st.subheader("🗂️ Papan Informasi Jaringan Rel")
+    st.write("Daftar lengkap seluruh koneksi rel langsung antarkota.")
 
     # 1. Mengumpulkan Data Koneksi Jalur Kereta secara Manual
     data_j = []
@@ -452,4 +450,4 @@ with tab6:
         kartu_terbuat += 1
 
     if kartu_terbuat == 0:
-        st.info("Tidak ada rute rel yang sesuai dengan filter pilihan Anda.")
+        st.info("Tidak ada rute rel yang sesuai dengan pilihan Anda.")
