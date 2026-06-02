@@ -1,48 +1,55 @@
 import heapq
 import streamlit as st
 
-# --- 1. PENGATURAN HALAMAN & TEMA WARNA BIRU TUA (CSS INJECTION) ---
+# --- 1. PENGATURAN HALAMAN & TEMA GAMBAR LATAR (CSS INJECTION) ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
 
-# Injeksi CSS Custom untuk Tema Biru Tua dengan Latar Belakang Bintik-Bintik
+# Injeksi CSS Custom untuk Background Gambar Kereta Bermutu Tinggi + Efek Blur Cinematik
 st.markdown(
     """
     <style>
-    /* 1. Latar Belakang Halaman Utama (Biru Tua dengan Pola Bintik Soft Blue) */
+    /* 1. Latar Belakang Halaman Utama Menggunakan Gambar Kereta Api Dengan Overlay Gelap */
     .stApp {
-        background-color: #0B192C;
-        background-image: radial-gradient(#1E3E62 15%, transparent 16%),
-                          radial-gradient(#1E3E62 15%, transparent 16%);
-        background-size: 30px 30px;
-        background-position: 0 0, 15px 15px;
+        background: linear-gradient(rgba(11, 25, 44, 0.85), rgba(11, 25, 44, 0.85)), 
+                    url("https://images.unsplash.com/photo-1532103054090-334e6e60ab29?q=80&w=2070") no-repeat center center fixed;
+        background-size: cover;
+    }
+    
+    /* Efek tambahan agar seluruh kontainer aplikasi terasa nge-blur lembut di latar belakang */
+    .stAppBlockContainer {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
     
     /* 2. Warna Judul Utama dan Subheader (Ice Blue / Cyan Soft) */
     h1, h2, h3, h4 {
         color: #00D2C4 !important;
         font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
     
-    /* Warna teks deskripsi bawaan */
+    /* Warna teks deskripsi bawaan agar kontras di latar belakang gelap */
     p, b, span, label {
         color: #E0E7FF !important;
     }
 
-    /* 3. Desain Kartu pada Tabs (Muted Dark Blue dengan Border) */
+    /* 3. Desain Kartu pada Tabs (Semi-Transparan Dark Blue agar menyatu dengan BG) */
     .stTabs [data-baseweb="tab-panel"] {
-        background-color: #1E3E62;
+        background-color: rgba(30, 62, 98, 0.75);
         padding: 30px;
         border-radius: 20px;
-        border: 2px solid #00D2C4;
-        box-shadow: 0 10px 20px rgba(0, 210, 196, 0.1);
+        border: 2px solid rgba(0, 210, 196, 0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         margin-top: 15px;
+        backdrop-filter: blur(4px);
     }
 
-    /* 4. Styling Tab Menu agar berwarna Cyan saat aktif */
+    /* 4. Styling Tab Menu */
     button[data-baseweb="tab"] {
         font-size: 18px;
         font-weight: bold;
         color: #94A3B8 !important;
+        background-color: transparent !important;
     }
     
     button[aria-selected="true"] {
@@ -58,34 +65,28 @@ st.markdown(
         border: none;
         transition: 0.3s;
         font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 210, 196, 0.2);
     }
     
     .stButton>button:hover {
         background-color: #00F5E6;
         border: none;
         color: #0B192C !important;
-        box-shadow: 0 4px 15px rgba(0, 210, 196, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 210, 196, 0.6);
     }
     
-    /* 6. Info & Success Box Custom Color */
+    /* 6. Info & Success Box Custom Color (Semi-Transparan) */
     .stAlert {
         border-radius: 15px;
-        border: 1px solid #00D2C4;
-        background-color: #0B192C;
-    }
-    
-    /* Menyelaraskan teks di dalam tabel st.table agar terbaca di background gelap */
-    .stTable table {
-        color: #E0E7FF !important;
-        background-color: #1E3E62 !important;
-        border-radius: 10px;
+        border: 1px solid rgba(0, 210, 196, 0.5);
+        background-color: rgba(11, 25, 44, 0.8);
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# --- JALUR JUDUL UTAMA & TABEL INFORMASI ---
+# --- JALUR JUDUL UTAMA ---
 st.title("🚇 Train Route Planner")
 st.write("Navigasi Jalur Kereta Api Indonesia")
 st.markdown("---")
