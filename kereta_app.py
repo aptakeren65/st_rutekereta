@@ -1,16 +1,17 @@
 import heapq
 import streamlit as st
+import random
 
-# --- 1. PENGATURAN HALAMAN ---
-st.set_page_config(layout="wide", page_title="Sistem Navigasi Kereta")
+# --- 1. PENGATURAN HALAMAN & CSS THEME ---
+st.set_page_config(layout="wide", page_title="Sistem Navigasi & Tiket Kereta")
 
-# Injeksi CSS Super Kuat (Menggunakan Selektor Global Paksa)
+# Injeksi CSS Custom untuk Background Gambar Kereta + Efek Blur + Glassmorphism Card
 st.markdown(
     """
     <style>
     /* Mengunci background secara mutlak di lapisan paling belakang */
     html, body, [data-testid="stAppViewContainer"] {
-        background: linear-gradient(rgba(11, 25, 44, 0.82), rgba(11, 25, 44, 0.82)), 
+        background: linear-gradient(rgba(11, 25, 44, 0.85), rgba(11, 25, 44, 0.85)), 
                     url("https://images.unsplash.com/photo-1532103054090-334e6e60ab29?q=80&w=2070") no-repeat center center fixed !important;
         background-size: cover !important;
     }
@@ -54,7 +55,7 @@ st.markdown(
 
     /* Desain Kartu pada Tabs (Transparan Gelap & Estetik) */
     .stTabs [data-baseweb="tab-panel"] {
-        background-color: rgba(15, 32, 67, 0.75) !important;
+        background-color: rgba(15, 32, 67, 0.8) !important;
         padding: 30px;
         border-radius: 20px;
         border: 2px solid rgba(0, 210, 196, 0.4) !important;
@@ -81,6 +82,7 @@ st.markdown(
         border-radius: 12px !important;
         border: none !important;
         font-weight: bold !important;
+        width: 100%;
     }
     
     .stButton>button:hover {
@@ -88,70 +90,58 @@ st.markdown(
         box-shadow: 0 0 15px rgba(0, 210, 196, 0.6) !important;
     }
     
-    /* Box Peringatan / Info */
+    /* Box Peringatan / Info / Tiket */
     .stAlert {
         border-radius: 15px !important;
         border: 1px solid rgba(0, 210, 196, 0.4) !important;
         background-color: rgba(11, 25, 44, 0.85) !important;
+    }
+
+    /* Simulasi Desain Tiket Fisik */
+    .ticket-box {
+        background: linear-gradient(135deg, #1E3E62, #0B192C);
+        border: 2px dashed #00D2C4;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# --- JALUR JUDUL UTAMA DALAM KOTAK (HEADER BOX) ---
+# --- JALUR JUDUL UTAMA DALAM KOTAK ---
 st.markdown(
     """
     <div class="header-box">
-        <h1>🚇 Train Route Planner</h1>
-        <p>Navigasi Jalur Kereta Api Indonesia</p>
+        <h1>🚇 Train Route Planner & Ticket System</h1>
+        <p>Sistem Navigasi Jalur Terpendek dan Pemesanan Tiket KA Indonesia</p>
     </div>
     """, 
     unsafe_allow_html=True
 )
 
 
-# --- 2. STRUKTUR DATA GRAPH (DENGAN OPERASI CRUD) ---
+# --- 2. STRUKTUR DATA GRAPH ---
 class GraphKereta:
-
     def __init__(self):
         self.nodes = set()
         self.edges = {}
-
-    # [C]REATE
-    def tambah_stasiun(self, nama_stasiun):
-        nama_stasiun = nama_stasiun.strip()
-        if nama_stasiun:
-            self.nodes.add(nama_stasiun)
-            if nama_stasiun not in self.edges:
-                self.edges[nama_stasiun] = []
 
     def tambah_rute(self, asal, tujuan, jarak_km):
         asal = asal.strip()
         tujuan = tujuan.strip()
         if asal and tujuan and asal != tujuan:
-            self.tambah_stasiun(asal)
-            self.tambah_stasiun(tujuan)
+            self.nodes.add(asal)
+            self.nodes.add(tujuan)
+            if asal not in self.edges: self.edges[asal] = []
+            if tujuan not in self.edges: self.edges[tujuan] = []
             if not any(node == tujuan for node, _ in self.edges[asal]):
                 self.edges[asal].append((tujuan, jarak_km))
                 self.edges[tujuan].append((asal, jarak_km))
 
-    # [U]PDATE
-    def update_jarak_rute(self, asal, tujuan, jarak_baru):
-        if asal in self.edges:
-            self.edges[asal] = [(node, jarak_baru) if node == tujuan else (node, j) for node, j in self.edges[asal]]
-        if tujuan in self.edges:
-            self.edges[tujuan] = [(node, jarak_baru) if node == asal else (node, j) for node, j in self.edges[tujuan]]
-
-    # [D]ELETE
-    def hapus_rute(self, asal, tujuan):
-        if asal in self.edges:
-            self.edges[asal] = [item for item in self.edges[asal] if item[0] != tujuan]
-        if tujuan in self.edges:
-            self.edges[tujuan] = [item for item in self.edges[tujuan] if item[0] != asal]
-
-
-# --- 3. DATA DEFAULT (SIMULASI JALUR INDONESIA) ---
+# Inisialisasi Data Graph Tetap (Sifatnya Read-Only Sekarang)
 if "graph_kereta" not in st.session_state:
     geo_graph = GraphKereta()
     rute_nasional = [
@@ -168,69 +158,155 @@ if "graph_kereta" not in st.session_state:
     st.session_state.graph_kereta = geo_graph
 
 graph = st.session_state.graph_kereta
+daftar_stasiun = sorted(list(graph.nodes))
 
 
-# --- 4. PEMBUATAN 4 MENU UTAMA (TABS) ---
+# --- 3. FUNGSI ALGORITMA DIJKSTRA ---
+def hitung_dijkstra(asal, tujuan):
+    queue = [(0, asal)]
+    dist = {n: float("inf") for n in graph.nodes}
+    dist[asal] = 0
+    prev = {n: None for n in graph.nodes}
+
+    while queue:
+        d, curr = heapq.heappop(queue)
+        if curr == tujuan: break
+        if d > dist[curr]: continue
+        for neighbor, weight in graph.edges.get(curr, []):
+            new_dist = d + weight
+            if new_dist < dist[neighbor]:
+                dist[neighbor] = new_dist
+                prev[neighbor] = curr
+                heapq.heappush(queue, (new_dist, neighbor))
+
+    path = []
+    temp = tujuan
+    while temp:
+        path.append(temp)
+        temp = prev[temp]
+    path.reverse()
+    return dist[tujuan], path
+
+
+# --- 4. PEMBUATAN MENU UTAMA (TABS BARU) ---
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📍 Cari Rute", 
-    "🗺️ Jaringan Rel", 
-    "⚙️ Kendali Data", 
-    "📊 Analisis Jaringan"
+    "📍 Cari Rute Terpendek", 
+    "🎫 Pesan Tiket KA", 
+    "🕒 Jadwal Keberangkatan", 
+    "🗺️ Peta Jaringan Rel"
 ])
 
 
 # ==================== MENU 1: CARI RUTE ====================
 with tab1:
-    st.subheader("📍 Temukan Perjalanan Terpendek")
-    daftar_stasiun = sorted(list(graph.nodes))
+    st.subheader("📍 Optimasi Jalur Kereta Tercepat")
+    col_asal, col_tujuan = st.columns(2)
+    with col_asal:
+        st_asal = st.selectbox("Titik Keberangkatan:", daftar_stasiun, key="rute_asal")
+    with col_tujuan:
+        st_tujuan = st.selectbox("Titik Tujuan Akhir:", daftar_stasiun, index=len(daftar_stasiun)-1, key="rute_tujuan")
 
-    if len(daftar_stasiun) < 2:
-        st.info("Tambahkan stasiun terlebih dahulu.")
-    else:
-        col_asal, col_tujuan = st.columns(2)
-        with col_asal:
-            st_asal = st.selectbox("Titik Berangkat:", daftar_stasiun, key="asal_s")
-        with col_tujuan:
-            st_tujuan = st.selectbox("Titik Tiba:", daftar_stasiun, index=len(daftar_stasiun)-1, key="tujuan_s")
-
-        if st.button("Mulai Hitung Rute", type="primary"):
-            if st_asal == st_tujuan:
-                st.warning("Asal dan tujuan tidak boleh sama!")
+    if st.button("Mulai Hitung Navigasi", type="primary", key="btn_nav"):
+        if st_asal == st_tujuan:
+            st.warning("Stasiun asal dan tujuan tidak boleh sama!")
+        else:
+            jarak, jalur = hitung_dijkstra(st_asal, st_tujuan)
+            if jarak == float("inf"):
+                st.error("Maaf, jalur rel antarkota tersebut belum terhubung.")
             else:
-                # Dijkstra Logic
-                queue = [(0, st_asal)]
-                dist = {n: float("inf") for n in graph.nodes}
-                dist[st_asal] = 0
-                prev = {n: None for n in graph.nodes}
-
-                while queue:
-                    d, curr = heapq.heappop(queue)
-                    if curr == st_tujuan: break
-                    if d > dist[curr]: continue
-                    for neighbor, weight in graph.edges.get(curr, []):
-                        new_dist = d + weight
-                        if new_dist < dist[neighbor]:
-                            dist[neighbor] = new_dist
-                            prev[neighbor] = curr
-                            heapq.heappush(queue, (new_dist, neighbor))
-
-                path = []
-                temp = st_tujuan
-                while temp:
-                    path.append(temp)
-                    temp = prev[temp]
-                path.reverse()
-
-                if dist[st_tujuan] == float("inf"):
-                    st.error("Jalur tidak terhubung.")
-                else:
-                    st.success(f"Rute terbaik ditemukan! Total Jarak: {dist[st_tujuan]} KM")
-                    st.info(" ➔ ".join([f"**{s}**" for s in path]))
+                st.success(f"Rute Terbaik Ditemukan! Total Jarak Tempuh: {jarak} KM")
+                st.info(" ➔ ".join([f"**{s}**" for s in jalur]))
 
 
-# ==================== MENU 2: JARINGAN REL ====================
+# ==================== MENU 2: PESAN TIKET KA (BARU) ====================
 with tab2:
-    st.subheader("🗺️ Daftar Rel Aktif")
+    st.subheader("🎫 Sistem Booking Tiket Mandiri")
+    
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        nama_penumpang = st.text_input("Nama Lengkap Penumpang:", placeholder="Contoh: Budi Santoso")
+        st_tiket_asal = st.selectbox("Stasiun Asal:", daftar_stasiun, key="tk_asal")
+        st_tiket_tujuan = st.selectbox("Stasiun Tujuan:", daftar_stasiun, index=1, key="tk_tujuan")
+    
+    with col_p2:
+        kelas_ka = st.selectbox("Kelas Kereta Api:", ["Eksekutif (Premium)", "Bisnis (Nyaman)", "Ekonomi (Hemat)"])
+        tanggal_perjalanan = st.date_input("Tanggal Keberangkatan:")
+        posisi_kursi = st.selectbox("Pilihan Nomor Kursi:", [f"{baris}{kolom}" for baris in range(1,15) for kolom in ['A','B','C','D']])
+
+    # Hitung tarif otomatis berdasarkan jarak real algoritma Dijkstra
+    if st_tiket_asal != st_tiket_tujuan:
+        jarak_real, _ = hitung_dijkstra(st_tiket_asal, st_tiket_tujuan)
+        if jarak_real != float("inf"):
+            # Simulasi harga per km berdasarkan kelas
+            pengali_kelas = {"Eksekutif (Premium)": 1500, "Bisnis (Nyaman)": 900, "Ekonomi (Hemat)": 500}
+            total_harga = jarak_real * pengali_kelas[kelas_ka]
+            
+            st.markdown(f"### 💰 Estimasi Biaya: **Rp {total_harga:,.0f}**")
+            
+            if st.button("Cetak E-Ticket", type="primary", key="btn_tiket"):
+                if not nama_penumpang:
+                    st.error("Mohon isi nama penumpang terlebih dahulu!")
+                else:
+                    kode_booking = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=6))
+                    st.success("Transaksi Berhasil! E-Ticket Anda telah diterbitkan di bawah ini:")
+                    
+                    # Tampilan E-Ticket Box Eksklusif
+                    st.markdown(
+                        f"""
+                        <div class="ticket-box">
+                            <h3 style='color: #00D2C4; margin-top:0;'>PT KERETA API INDONESIA - E-TICKET</h3>
+                            <hr style='border-color: rgba(0, 210, 196, 0.3);'>
+                            <table style='width:100%; border:none; font-size:15px; color:#E2E8F0;'>
+                                <tr><td><b>Kode Booking</b></td><td>: <span style='color:#00D2C4; font-weight:bold;'>{kode_booking}</span></td></tr>
+                                <tr><td><b>Nama Penumpang</b></td><td>: {nama_penumpang}</td></tr>
+                                <tr><td><b>Perjalanan</b></td><td>: {st_tiket_asal} ➔ {st_tiket_tujuan} ({jarak_real} KM)</td></tr>
+                                <tr><td><b>Tanggal / Kursi</b></td><td>: {tanggal_perjalanan} / Kursi {posisi_kursi}</td></tr>
+                                <tr><td><b>Kelas & Tarif</b></td><td>: {kelas_ka} - <b>Rp {total_harga:,.0f}</b></td></tr>
+                            </table>
+                            <p style='font-size:11px; color:#94A3B8; margin-top:15px; text-align:center;'>*Tunjukkan kode booking ini saat melakukan boarding di stasiun mandiri.</p>
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+        else:
+            st.error("Rute stasiun tidak terhubung, tiket tidak dapat dipesan.")
+    else:
+        st.warning("Silakan pilih stasiun asal dan tujuan yang berbeda untuk menghitung tarif tiket.")
+
+
+# ==================== MENU 3: JADWAL KEBERANGKATAN (BARU) ====================
+with tab3:
+    st.subheader("🕒 Papan Informasi Jadwal Keberangkatan")
+    st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
+    
+    # Generate simulasi jadwal otomatis agar variatif berdasarkan nama stasiun
+    random.seed(len(st_pilih_jadwal)) 
+    kereta_list = ["Argo Bromo Anggrek", "Gajayana", "Argo Lawu", "Taksaka", "Brawijaya", "Kertajaya", "Jayakarta", "Logawa"]
+    
+    data_jadwal = []
+    # Ambil tetangga stasiun tujuan dari graf
+    tujuan_tersedia = [tujuan for tujuan, _ in graph.edges.get(st_pilih_jadwal, [])]
+    
+    if not tujuan_tersedia:
+        # Jika stasiun terisolasi (contoh data simulasi pulau luar), ambil acak stasiun lain
+        tujuan_tersedia = [s for s in daftar_stasiun if s != st_pilih_jadwal]
+
+    for i in range(4): # Menampilkan 4 kereta per stasiun
+        nama_ka = kereta_list[(len(st_pilih_jadwal) + i) % len(kereta_list)]
+        jam = f"{8 + (i*4):02d}:{random.choice([0,15,30,45]):02d}"
+        tujuan_ka = tujuan_tersedia[i % len(tujuan_tersedia)]
+        status = random.choice(["ON TIME", "ON TIME", "DELAY 10 MNT", "BOARDING"])
+        
+        data_jadwal.append({"Jam": jam, "Nama Kereta Api": nama_ka, "Tujuan Akhir": tujuan_ka, "Status": status})
+    
+    # Urutkan berdasarkan jam
+    data_jadwal = sorted(data_jadwal, key=lambda x: x["Jam"])
+    st.table(data_jadwal)
+
+
+# ==================== MENU 4: JARINGAN REL (MANTAN MENU 2) ====================
+with tab4:
+    st.subheader("🗺️ Jaringan Rel Antarkota Aktif")
     data_j = []
     for s, t_list in graph.edges.items():
         for t, j in t_list:
@@ -240,57 +316,3 @@ with tab2:
     for i, (a, b, j) in enumerate(sorted(data_j)):
         target_col = col_a if i % 2 == 0 else col_b
         target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km)")
-
-
-# ==================== MENU 3: CRUD PANEL ====================
-with tab3:
-    st.subheader("⚙️ Kendali Data")
-    c1, c2, c3 = st.columns(3)
-    
-    # Create
-    with c1:
-        st.markdown("### ➕ Tambah")
-        in_a = st.text_input("Asal:", key="ca")
-        in_b = st.text_input("Tujuan:", key="cb")
-        in_j = st.number_input("Jarak (KM):", min_value=1, value=10, key="cj")
-        if st.button("Simpan Baru"):
-            graph.tambah_rute(in_a, in_b, in_j)
-            st.rerun()
-
-    # Get rute for U & D
-    current_routes = []
-    for s, t_list in graph.edges.items():
-        for t, j in t_list:
-            if (t, s, j) not in current_routes: current_routes.append((s, t, j))
-
-    # Update
-    with c2:
-        st.markdown("### 📝 Update")
-        if current_routes:
-            u_opsi = [f"{a}-{t}" for a, t, j in sorted(current_routes)]
-            u_sel = st.selectbox("Pilih Rute:", u_opsi, key="us")
-            u_j = st.number_input("Jarak Baru:", min_value=1, key="uj")
-            if st.button("Update Jarak"):
-                a_u, t_u = u_sel.split("-")
-                graph.update_jarak_rute(a_u, t_u, u_j)
-                st.rerun()
-
-    # Delete
-    with c3:
-        st.markdown("### 🗑️ Hapus")
-        if current_routes:
-            d_opsi = [f"{a}-{t}" for a, t, j in sorted(current_routes)]
-            d_sel = st.selectbox("Hapus Rute:", d_opsi, key="ds")
-            if st.button("Eksekusi Hapus"):
-                a_d, t_d = d_sel.split("-")
-                graph.hapus_rute(a_d, t_d)
-                st.rerun()
-
-
-# ==================== MENU 4: ANALISIS ====================
-with tab4:
-    st.subheader("📊 Analisis Jaringan")
-    stats = {k: len(v) for k, v in graph.edges.items()}
-    if stats:
-        st.bar_chart(stats)
-        st.dataframe([{"Stasiun": k, "Koneksi": v} for k, v in stats.items()], use_container_width=True)
