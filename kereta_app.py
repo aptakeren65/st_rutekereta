@@ -65,7 +65,7 @@ st.markdown(
 
     /* Styling Menu Tab */
     button[data-baseweb="tab"] {
-        font-size: 18px !important;
+        font-size: 16px !important;
         font-weight: bold !important;
         color: #94A3B8 !important;
     }
@@ -116,7 +116,7 @@ st.markdown(
     """
     <div class="header-box">
         <h1>🚇 SAS Train Route </h1>
-        <p>Sistem Navigasi Jalur Kereta Indonesia</p>
+        <p>Sistem Navigasi Jalur Indonesia</p>
     </div>
     """, 
     unsafe_allow_html=True
@@ -141,7 +141,7 @@ class GraphKereta:
                 self.edges[asal].append((tujuan, jarak_km))
                 self.edges[tujuan].append((asal, jarak_km))
 
-# Inisialisasi Data Graph
+# Inisialisasi Data Graph Tetap
 if "graph_kereta" not in st.session_state:
     geo_graph = GraphKereta()
     rute_nasional = [
@@ -161,7 +161,7 @@ graph = st.session_state.graph_kereta
 daftar_stasiun = sorted(list(graph.nodes))
 
 
-# --- 3. FUNGSI ALGORITMA DIJKSTRA & ESTIMASI WAKTU ---
+# --- 3. FUNGSI ALGORITMA DIJKSTRA & ESTIMASI PERJALANAN ---
 def hitung_dijkstra(asal, tujuan):
     queue = [(0, asal)]
     dist = {n: float("inf") for n in graph.nodes}
@@ -187,33 +187,33 @@ def hitung_dijkstra(asal, tujuan):
     path.reverse()
     return dist[tujuan], path
 
-def konversi_ke_waktu(jarak_km):
-    """Mengonversi jarak menjadi estimasi waktu perjalanan (Kecepatan rata-rata KA: 90 km/jam)"""
-    kecepatan_rata_rata = 90
-    total_jam = jarak_km / kecepatan_rata_rata
+def hitung_estimasi_waktu(jarak_km, kecepatan=80):
+    total_jam = jarak_km / kecepatan
     jam = int(total_jam)
     menit = int((total_jam - jam) * 60)
     
-    hasil = ""
+    waktu_str = ""
     if jam > 0:
-        hasil += f"{jam} Jam "
+        waktu_str += f"{jam} jam "
     if menit > 0 or jam == 0:
-        hasil += f"{menit} Menit"
-    return hasil
+        waktu_str += f"{menit} menit"
+    return waktu_str
 
 
-# --- 4. PEMBUATAN MENU UTAMA (TABS) ---
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📍 Cari Rute & Estimasi", 
-    "🎫 Pesan Tiket", 
-    "🕒 Jadwal Keberangkatan", 
-    "📊 Analisis Jaringan Rel"
+# --- 4. PEMBUATAN MENU UTAMA (6 TABS) ---
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "📍 Cari Rute Terbaik", 
+    "⏱️ Estimasi Waktu", 
+    "🎫 Pesan Tiket Mandiri", 
+    "🕒 Jadwal Kereta",
+    "🎰 Live Traffic Simulator",
+    "🗺️ Peta & Jalur Tercepat"
 ])
 
 
-# ==================== MENU 1: CARI RUTE & ESTIMASI ====================
+# ==================== MENU 1: CARI RUTE TERBAIK ====================
 with tab1:
-    st.subheader("📍 Optimasi Jalur Kereta & Perkiraan Waktu Tiba")
+    st.subheader("📍 Optimasi Jalur Kereta Terpendek")
     col_asal, col_tujuan = st.columns(2)
     with col_asal:
         st_asal = st.selectbox("Titik Keberangkatan:", daftar_stasiun, key="rute_asal")
@@ -228,23 +228,37 @@ with tab1:
             if jarak == float("inf"):
                 st.error("Maaf, jalur rel antarkota tersebut belum terhubung.")
             else:
-                waktu_estimasi = konversi_ke_waktu(jarak)
-                
-                # Layout info hasil
-                st.success(f"🎉 Rute Terbaik Ditemukan!")
-                
-                c_res1, c_res2 = st.columns(2)
-                with c_res1:
-                    st.info(f"📏 **Total Jarak Tempuh:** {jarak} KM")
-                with c_res2:
-                    st.info(f"⏱️ **Estimasi Durasi Perjalanan:** {waktu_estimasi} *(Kecepatan rata-rata 90 km/jam)*")
-                
-                st.markdown("#### 🛣️ Rute Stasiun Yang Dilewati:")
+                st.success(f"🏁 Rute Terbaik Ditemukan! Total Jarak Tempuh: {jarak} KM")
                 st.info(" ➔ ".join([f"**{s}**" for s in jalur]))
 
 
-# ==================== MENU 2: PESAN TIKET KA ====================
+# ==================== MENU 2: ESTIMASI WAKTU PERJALANAN ====================
 with tab2:
+    st.subheader("⏱️ Kalkulator Estimasi Waktu Perjalanan Riil")
+    st.write("Hitung berapa lama waktu yang kamu butuhkan berdasarkan kecepatan laju kereta api.")
+    
+    col_est1, col_est2 = st.columns(2)
+    with col_est1:
+        st_est_asal = st.selectbox("Pilih Stasiun Asal:", daftar_stasiun, key="est_asal")
+        st_est_tujuan = st.selectbox("Pilih Stasiun Tujuan:", daftar_stasiun, index=len(daftar_stasiun)-1, key="est_tujuan")
+    with col_est2:
+        kecepatan_pilihan = st.slider("Atur Kecepatan Rata-Rata Kereta (KM/Jam):", min_value=50, max_value=120, value=80, step=5)
+
+    if st.button("Hitung Estimasi Durasi", type="primary", key="btn_estimasi"):
+        if st_est_asal == st_est_tujuan:
+            st.warning("Stasiun asal dan tujuan tidak boleh sama!")
+        else:
+            jarak_est, jalur_est = hitung_dijkstra(st_est_asal, st_est_tujuan)
+            if jarak_est == float("inf"):
+                st.error("Rute tidak terhubung, estimasi waktu tidak dapat dihitung.")
+            else:
+                waktu_hasil = hitung_estimasi_waktu(jarak_est, kecepatan_pilihan)
+                st.metric(label=f"Durasi Perjalanan ({kecepatan_pilihan} km/jam)", value=waktu_hasil)
+                st.write(f"ℹ️ Jarak total yang akan ditempuh melewati rute ini adalah **{jarak_est} KM**.")
+
+
+# ==================== MENU 3: PESAN TIKET MANDIRI ====================
+with tab3:
     st.subheader("🎫 Sistem Booking Tiket Mandiri")
     
     col_p1, col_p2 = st.columns(2)
@@ -263,9 +277,9 @@ with tab2:
         if jarak_real != float("inf"):
             pengali_kelas = {"Eksekutif (Premium)": 1500, "Bisnis (Nyaman)": 900, "Ekonomi (Hemat)": 500}
             total_harga = jarak_real * pengali_kelas[kelas_ka]
-            waktu_perjalanan_tiket = konversi_ke_waktu(jarak_real)
+            estimasi_waktu_tiket = hitung_estimasi_waktu(jarak_real)
             
-            st.markdown(f"### 💰 Estimasi Biaya: **Rp {total_harga:,.0f}**   *(Durasi: {waktu_perjalanan_tiket})*")
+            st.markdown(f"### 💰 Estimasi Biaya: **Rp {total_harga:,.0f}**")
             
             if st.button("Cetak E-Ticket", type="primary", key="btn_tiket"):
                 if not nama_penumpang:
@@ -283,7 +297,7 @@ with tab2:
                                 <tr><td><b>Kode Booking</b></td><td>: <span style='color:#00D2C4; font-weight:bold;'>{kode_booking}</span></td></tr>
                                 <tr><td><b>Nama Penumpang</b></td><td>: {nama_penumpang}</td></tr>
                                 <tr><td><b>Perjalanan</b></td><td>: {st_tiket_asal} ➔ {st_tiket_tujuan} ({jarak_real} KM)</td></tr>
-                                <tr><td><b>Estimasi Waktu</b></td><td>: {waktu_perjalanan_tiket}</td></tr>
+                                <tr><td><b>Estimasi Perjalanan</b></td><td>: {estimasi_waktu_tiket}</td></tr>
                                 <tr><td><b>Tanggal / Kursi</b></td><td>: {tanggal_perjalanan} / Kursi {posisi_kursi}</td></tr>
                                 <tr><td><b>Kelas & Tarif</b></td><td>: {kelas_ka} - <b>Rp {total_harga:,.0f}</b></td></tr>
                             </table>
@@ -298,9 +312,9 @@ with tab2:
         st.warning("Silakan pilih stasiun asal dan tujuan yang berbeda untuk menghitung tarif tiket.")
 
 
-# ==================== MENU 3: JADWAL KEBERANGKATAN ====================
-with tab3:
-    st.subheader("🕒 Papan Informasi Jadwal Keberangkatan")
+# ==================== MENU 4: JADWAL KEBERANGKATAN ====================
+with tab4:
+    st.subheader("🕒 Informasi Jadwal Keberangkatan")
     st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
     
     random.seed(len(st_pilih_jadwal)) 
@@ -324,61 +338,83 @@ with tab3:
     st.table(data_jadwal)
 
 
-# ==================== MENU 4: ANALISIS JARINGAN (FITUR PINTAR BARU) ====================
-with tab4:
-    st.subheader("📊 Intelijen & Analisis Jaringan Rel Aktif")
+# ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN (MENARIK/BARU) ====================
+with tab5:
+    st.subheader("🎰 Live Traffic & Simulator Kepadatan Stasiun")
+    st.write("Gunakan simulator ini untuk memantau status keramaian dan lalu lintas stasiun secara real-time.")
     
-    # --- PROSES DATA UNTUK STATISTIK PINTAR ---
-    stasiun_sibuk = ""
-    maks_koneksi = -1
-    rute_tercepat_nama = ""
-    jarak_terpendek = float("inf")
+    st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
-    # 1. Cari stasiun paling sibuk (Koneksi rel terbanyak)
-    for stasiun, koneksi in graph.edges.items():
-        if len(koneksi) > maks_koneksi:
-            maks_koneksi = len(koneksi)
-            stasiun_sibuk = stasiun
-            
-    # 2. Cari rute antarkota langsung yang paling pendek/cepat
-    rute_tercatat = []
+    # Membuat data simulasi dinamis acak berbasis nama stasiun agar interaktif
+    random.seed(len(st_pilih_simulasi) * 42)
+    kepadatan_persen = random.randint(15, 100)
+    jumlah_penumpang = random.randint(120, 2500)
+    jumlah_antrean = random.randint(1, 12)
+    
+    if kepadatan_persen < 45:
+        status_teks = "🟢 SEPI / LANCAR AMAN"
+        status_warna = "green"
+        tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antre."
+    elif kepadatan_persen < 75:
+        status_teks = "🟡 CUKUP PADAT / RAMAI"
+        status_warna = "orange"
+        tips = "Volume penumpang sedang meningkat. Harap datang 30 menit lebih awal sebelum jam keberangkatan."
+    else:
+        status_teks = "🔴 MACET TOTAL / SANGAT PADAT"
+        status_warna = "red"
+        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah! Antrean boarding mengular. Disarankan segera menuju stasiun sekarang."
+
+    # Visualisasi Dashboard Interaktif Kecil
+    col_s1, col_s2, col_s3 = st.columns(3)
+    with col_s1:
+        st.metric(label="Status Arus Lalu Lintas", value=status_teks)
+    with col_s2:
+        st.metric(label="Estimasi Penumpang Aktif", value=f"{jumlah_penumpang} Orang")
+    with col_s3:
+        st.metric(label="Jumlah Kereta Bersandar/Antre", value=f"{jumlah_antrean} KA")
+        
+    st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
+    st.progress(kepadatan_persen / 100)
+    st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
+    
+    # Kotak Informasi Tips Visual
+    st.markdown(
+        f"""
+        <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
+            <b style="color: #00D2C4;">📢 Rekomendasi Sistem untuk Stasiun {st_pilih_simulasi}:</b><br>
+            <span style="font-size: 14px; color: #E2E8F0;">{tips}</span>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+
+# ==================== MENU 6: PETA & JALUR TERCEPAT ====================
+with tab6:
+    st.subheader("🗺️ Jaringan Rel Aktif & Jalur Tercepat Global")
+    
+    rute_tercepat_global = ""
+    jarak_terpendek_global = float("inf")
+    
+    data_j = []
     for s, t_list in graph.edges.items():
         for t, j in t_list:
-            if (t, s, j) not in rute_tercatat:
-                rute_tercatat.append((s, t, j))
-                if j < jarak_terpendek:
-                    jarak_terpendek = j
-                    rute_tercepat_nama = f"{s} ↔️ {t}"
-
-    # --- TAMPILKAN MATRIKS ANALISIS ---
-    col_stat1, col_stat2 = st.columns(2)
+            if (t, s, j) not in data_j: 
+                data_j.append((s, t, j))
+                if j < jarak_terpendek_global:
+                    jarak_terpendek_global = j
+                    rute_tercepat_global = f"{s} ↔️ {t}"
+                    
+    st.markdown(
+        f"""
+        <div style="background-color: rgba(0, 210, 196, 0.15); padding: 20px; border-radius: 12px; border-left: 5px solid #00D2C4; margin-bottom: 25px;">
+            <b style="color: #00D2C4; font-size: 16px;">⚡ Koneksi Rel Langsung Tercepat se-Nasional:</b><br>
+            <span style="font-size: 24px; font-weight: bold;">{rute_tercepat_global}</span> hanya berjarak <span style="color:#00D2C4; font-weight:bold;">{jarak_terpendek_global} KM</span> (Estimasi Waktu Tempuh: {hitung_estimasi_waktu(jarak_terpendek_global)}).
+        </div>
+        """, unsafe_allow_html=True
+    )
     
-    with col_stat1:
-        st.markdown(
-            f"""
-            <div style="background-color: rgba(0, 210, 196, 0.1); padding: 20px; border-radius: 15px; border-left: 5px solid #00D2C4;">
-                <h4 style="margin:0; color:#00D2C4;">🚉 Stasiun Paling Sibuk (Transit Utama)</h4>
-                <p style="font-size:24px; font-weight:bold; margin:10px 0 0 0; color:#FFF;">{stasiun_sibuk}</p>
-                <p style="font-size:14px; margin:0; color:#94A3B8;">Memiliki {maks_koneksi} cabang rel aktif terhubung</p>
-            </div>
-            """, unsafe_allow_html=True
-        )
-        
-    with col_stat2:
-        st.markdown(
-            f"""
-            <div style="background-color: rgba(245, 0, 135, 0.1); padding: 20px; border-radius: 15px; border-left: 5px solid #FF007F;">
-                <h4 style="margin:0; color:#FF007F;">⚡ Koneksi Antarkota Paling Cepat</h4>
-                <p style="font-size:24px; font-weight:bold; margin:10px 0 0 0; color:#FFF;">{rute_tercepat_nama}</p>
-                <p style="font-size:14px; margin:0; color:#94A3B8;">Jarak langsung hanya {jarak_terpendek} KM (Estimasi: {konversi_ke_waktu(jarak_terpendek)})</p>
-            </div>
-            """, unsafe_allow_html=True
-        )
-
-    st.markdown("---")
-    st.markdown("### 🗺️ Daftar Seluruh Rel Aktif")
-    
+    st.write("📋 **Daftar Lengkap Seluruh Panjang Jalur Rel Antarkota:**")
     col_a, col_b = st.columns(2)
-    for i, (a, b, j) in enumerate(sorted(rute_tercatat)):
+    for i, (a, b, j) in enumerate(sorted(data_j)):
         target_col = col_a if i % 2 == 0 else col_b
-        target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km) — *Estimasi: {konversi_ke_waktu(j)}*")
+        target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km) — *Estimasi: {hitung_estimasi_waktu(j)}*")
