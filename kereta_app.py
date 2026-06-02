@@ -115,8 +115,8 @@ st.markdown(
 st.markdown(
     """
     <div class="header-box">
-        <h1>🚇 Train Route Planner & Ticket System</h1>
-        <p>Sistem Navigasi Jalur Terpendek dan Pemesanan Tiket KA Indonesia</p>
+        <h1>🚇 SAS Train Route </h1>
+        <p>Sistem Navigasi Jalur Indonesia</p>
     </div>
     """, 
     unsafe_allow_html=True
@@ -190,8 +190,8 @@ def hitung_dijkstra(asal, tujuan):
 
 # --- 4. PEMBUATAN MENU UTAMA (TABS BARU) ---
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📍 Cari Rute Terpendek", 
-    "🎫 Pesan Tiket KA", 
+    "📍 Cari Rute ", 
+    "🎫 Pesan Tiket ", 
     "🕒 Jadwal Keberangkatan", 
     "🗺️ Peta Jaringan Rel"
 ])
@@ -199,14 +199,14 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 # ==================== MENU 1: CARI RUTE ====================
 with tab1:
-    st.subheader("📍 Optimasi Jalur Kereta Tercepat")
+    st.subheader("📍 Optimasi Jalur Kereta ")
     col_asal, col_tujuan = st.columns(2)
     with col_asal:
         st_asal = st.selectbox("Titik Keberangkatan:", daftar_stasiun, key="rute_asal")
     with col_tujuan:
         st_tujuan = st.selectbox("Titik Tujuan Akhir:", daftar_stasiun, index=len(daftar_stasiun)-1, key="rute_tujuan")
 
-    if st.button("Mulai Hitung Navigasi", type="primary", key="btn_nav"):
+    if st.button("Mulai Hitung", type="primary", key="btn_nav"):
         if st_asal == st_tujuan:
             st.warning("Stasiun asal dan tujuan tidak boleh sama!")
         else:
@@ -276,7 +276,7 @@ with tab2:
 
 # ==================== MENU 3: JADWAL KEBERANGKATAN (BARU) ====================
 with tab3:
-    st.subheader("🕒 Papan Informasi Jadwal Keberangkatan")
+    st.subheader("🕒 Informasi Jadwal Keberangkatan")
     st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
     
     # Generate simulasi jadwal otomatis agar variatif berdasarkan nama stasiun
