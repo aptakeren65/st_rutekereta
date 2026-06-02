@@ -1,6 +1,7 @@
 import heapq
 import streamlit as st
 import random
+import pandas as pd
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
 st.set_page_config(layout="wide", page_title="Sistem Navigasi & Tiket Kereta")
@@ -106,6 +107,16 @@ st.markdown(
         margin-top: 20px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     }
+
+    /* Kartu Informasi Komponen Rute Modern */
+    .route-card {
+        background: rgba(11, 25, 44, 0.6);
+        border: 1px solid rgba(0, 210, 196, 0.2);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -207,7 +218,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🎫 Pesan Tiket Mandiri", 
     "🕒 Jadwal Kereta",
     "🎰 Live Traffic Simulator",
-    "🗺️ Peta & Jalur Tercepat"
+    "🗂️ Papan Kartu Informasi Rute"
 ])
 
 
@@ -279,142 +290,4 @@ with tab3:
             total_harga = jarak_real * pengali_kelas[kelas_ka]
             estimasi_waktu_tiket = hitung_estimasi_waktu(jarak_real)
             
-            st.markdown(f"### 💰 Estimasi Biaya: **Rp {total_harga:,.0f}**")
-            
-            if st.button("Cetak E-Ticket", type="primary", key="btn_tiket"):
-                if not nama_penumpang:
-                    st.error("Mohon isi nama penumpang terlebih dahulu!")
-                else:
-                    kode_booking = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=6))
-                    st.success("Transaksi Berhasil! E-Ticket Anda telah diterbitkan di bawah ini:")
-                    
-                    st.markdown(
-                        f"""
-                        <div class="ticket-box">
-                            <h3 style='color: #00D2C4; margin-top:0;'>PT KERETA API INDONESIA - E-TICKET</h3>
-                            <hr style='border-color: rgba(0, 210, 196, 0.3);'>
-                            <table style='width:100%; border:none; font-size:15px; color:#E2E8F0;'>
-                                <tr><td><b>Kode Booking</b></td><td>: <span style='color:#00D2C4; font-weight:bold;'>{kode_booking}</span></td></tr>
-                                <tr><td><b>Nama Penumpang</b></td><td>: {nama_penumpang}</td></tr>
-                                <tr><td><b>Perjalanan</b></td><td>: {st_tiket_asal} ➔ {st_tiket_tujuan} ({jarak_real} KM)</td></tr>
-                                <tr><td><b>Estimasi Perjalanan</b></td><td>: {estimasi_waktu_tiket}</td></tr>
-                                <tr><td><b>Tanggal / Kursi</b></td><td>: {tanggal_perjalanan} / Kursi {posisi_kursi}</td></tr>
-                                <tr><td><b>Kelas & Tarif</b></td><td>: {kelas_ka} - <b>Rp {total_harga:,.0f}</b></td></tr>
-                            </table>
-                            <p style='font-size:11px; color:#94A3B8; margin-top:15px; text-align:center;'>*Tunjukkan kode booking ini saat melakukan boarding di stasiun mandiri.</p>
-                        </div>
-                        """, 
-                        unsafe_allow_html=True
-                    )
-        else:
-            st.error("Rute stasiun tidak terhubung, tiket tidak dapat dipesan.")
-    else:
-        st.warning("Silakan pilih stasiun asal dan tujuan yang berbeda untuk menghitung tarif tiket.")
-
-
-# ==================== MENU 4: JADWAL KEBERANGKATAN ====================
-with tab4:
-    st.subheader("🕒 Informasi Jadwal Keberangkatan")
-    st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
-    
-    random.seed(len(st_pilih_jadwal)) 
-    kereta_list = ["Argo Bromo Anggrek", "Gajayana", "Argo Lawu", "Taksaka", "Brawijaya", "Kertajaya", "Jayakarta", "Logawa"]
-    
-    data_jadwal = []
-    tujuan_tersedia = [tujuan for tujuan, _ in graph.edges.get(st_pilih_jadwal, [])]
-    
-    if not tujuan_tersedia:
-        tujuan_tersedia = [s for s in daftar_stasiun if s != st_pilih_jadwal]
-
-    for i in range(4): 
-        nama_ka = kereta_list[(len(st_pilih_jadwal) + i) % len(kereta_list)]
-        jam = f"{8 + (i*4):02d}:{random.choice([0,15,30,45]):02d}"
-        tujuan_ka = tujuan_tersedia[i % len(tujuan_tersedia)]
-        status = random.choice(["ON TIME", "ON TIME", "DELAY 10 MNT", "BOARDING"])
-        
-        data_jadwal.append({"Jam": jam, "Nama Kereta Api": nama_ka, "Tujuan Akhir": tujuan_ka, "Status": status})
-    
-    data_jadwal = sorted(data_jadwal, key=lambda x: x["Jam"])
-    st.table(data_jadwal)
-
-
-# ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN (MENARIK/BARU) ====================
-with tab5:
-    st.subheader("🎰 Live Traffic & Simulator Kepadatan Stasiun")
-    st.write("Gunakan simulator ini untuk memantau status keramaian dan lalu lintas stasiun secara real-time.")
-    
-    st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
-    
-    # Membuat data simulasi dinamis acak berbasis nama stasiun agar interaktif
-    random.seed(len(st_pilih_simulasi) * 42)
-    kepadatan_persen = random.randint(15, 100)
-    jumlah_penumpang = random.randint(120, 2500)
-    jumlah_antrean = random.randint(1, 12)
-    
-    if kepadatan_persen < 45:
-        status_teks = "🟢 SEPI / LANCAR AMAN"
-        status_warna = "green"
-        tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antre."
-    elif kepadatan_persen < 75:
-        status_teks = "🟡 CUKUP PADAT / RAMAI"
-        status_warna = "orange"
-        tips = "Volume penumpang sedang meningkat. Harap datang 30 menit lebih awal sebelum jam keberangkatan."
-    else:
-        status_teks = "🔴 MACET TOTAL / SANGAT PADAT"
-        status_warna = "red"
-        tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah! Antrean boarding mengular. Disarankan segera menuju stasiun sekarang."
-
-    # Visualisasi Dashboard Interaktif Kecil
-    col_s1, col_s2, col_s3 = st.columns(3)
-    with col_s1:
-        st.metric(label="Status Arus Lalu Lintas", value=status_teks)
-    with col_s2:
-        st.metric(label="Estimasi Penumpang Aktif", value=f"{jumlah_penumpang} Orang")
-    with col_s3:
-        st.metric(label="Jumlah Kereta Bersandar/Antre", value=f"{jumlah_antrean} KA")
-        
-    st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
-    st.progress(kepadatan_persen / 100)
-    st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
-    
-    # Kotak Informasi Tips Visual
-    st.markdown(
-        f"""
-        <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
-            <b style="color: #00D2C4;">📢 Rekomendasi Sistem untuk Stasiun {st_pilih_simulasi}:</b><br>
-            <span style="font-size: 14px; color: #E2E8F0;">{tips}</span>
-        </div>
-        """, unsafe_allow_html=True
-    )
-
-
-# ==================== MENU 6: PETA & JALUR TERCEPAT ====================
-with tab6:
-    st.subheader("🗺️ Jaringan Rel Aktif & Jalur Tercepat Global")
-    
-    rute_tercepat_global = ""
-    jarak_terpendek_global = float("inf")
-    
-    data_j = []
-    for s, t_list in graph.edges.items():
-        for t, j in t_list:
-            if (t, s, j) not in data_j: 
-                data_j.append((s, t, j))
-                if j < jarak_terpendek_global:
-                    jarak_terpendek_global = j
-                    rute_tercepat_global = f"{s} ↔️ {t}"
-                    
-    st.markdown(
-        f"""
-        <div style="background-color: rgba(0, 210, 196, 0.15); padding: 20px; border-radius: 12px; border-left: 5px solid #00D2C4; margin-bottom: 25px;">
-            <b style="color: #00D2C4; font-size: 16px;">⚡ Koneksi Rel Langsung Tercepat se-Nasional:</b><br>
-            <span style="font-size: 24px; font-weight: bold;">{rute_tercepat_global}</span> hanya berjarak <span style="color:#00D2C4; font-weight:bold;">{jarak_terpendek_global} KM</span> (Estimasi Waktu Tempuh: {hitung_estimasi_waktu(jarak_terpendek_global)}).
-        </div>
-        """, unsafe_allow_html=True
-    )
-    
-    st.write("📋 **Daftar Lengkap Seluruh Panjang Jalur Rel Antarkota:**")
-    col_a, col_b = st.columns(2)
-    for i, (a, b, j) in enumerate(sorted(data_j)):
-        target_col = col_a if i % 2 == 0 else col_b
-        target_col.write(f"🚇 **{a}** ↔️ **{b}** ({j} km) — *Estimasi: {hitung_estimasi_waktu(j)}*")
+            st.markdown(f"### 💰 Estim
