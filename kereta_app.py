@@ -301,7 +301,7 @@ with tab3:
                     st.markdown(
                         f"""
                         <div class="ticket-box">
-                            <h3 style='color: #00D2C4; margin-top:0;'>SAS KERETA API INDONESIA - E-TICKET</h3>
+                            <h3 style='color: #00D2C4; margin-top:0;'>SAS KERETA API - E-TICKET</h3>
                             <hr style='border-color: rgba(0, 210, 196, 0.3);'>
                             <table style='width:100%; border:none; font-size:15px; color:#E2E8F0;'>
                                 <tr><td><b>Kode Booking</b></td><td>: <span style='color:#00D2C4; font-weight:bold;'>{kode_booking}</span></td></tr>
