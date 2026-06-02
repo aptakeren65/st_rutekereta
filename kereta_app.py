@@ -88,23 +88,6 @@ st.markdown(
 # --- JALUR JUDUL UTAMA & TABEL INFORMASI ---
 st.title("🚇 Train Route Planner")
 st.write("Navigasi Jalur Kereta Api Indonesia")
-
-# Tabel identitas diletakkan tepat di bawah st.write judul
-informasi_aplikasi = {
-    "Detail Proyek": [
-        "Nama Aplikasi",
-        "NIM Akhir Mahasiswa",
-        "Algoritma",
-        "Struktur Data"
-    ],
-    "Informasi": [
-        "Sistem Navigasi Jalur Kereta Api",
-        "056",
-        "Dijkstra Algorithm",
-        "Graph (Adjacency List & Heap)"
-    ]
-}
-st.table(informasi_aplikasi)
 st.markdown("---")
 
 
