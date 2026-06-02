@@ -373,7 +373,7 @@ with tab5:
     with col_s2:
         st.metric(label="Estimasi Penumpang Aktif", value=f"{jumlah_penumpang} Orang")
     with col_s3:
-        st.metric(label="Jumlah Kereta Bersandar/Antre", value=f"{jumlah_antrean} KA")
+        st.metric(label="Jumlah Kereta Bersandar/Antri", value=f"{jumlah_antrean} KA")
         
     st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
     st.progress(kepadatan_persen / 100)
