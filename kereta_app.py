@@ -63,19 +63,34 @@ st.markdown(
         margin-top: 20px;
     }
 
-    /* Tombol Utama (Cyan) */
-    .stButton>button {
-        background-color: #00D2C4 !important;
-        color: #0B192C !important;
+    /* Tombol Utama (Primary) - Kontras (Warna Orange/Coral) */
+    .stButton>button[data-testid="baseButton-primary"] {
+        background-color: #FF5733 !important;
+        color: white !important;
         border-radius: 12px !important;
         border: none !important;
         font-weight: bold !important;
         width: 100%;
     }
     
-    .stButton>button:hover {
-        background-color: #00F5E6 !important;
-        box-shadow: 0 0 15px rgba(0, 210, 196, 0.6) !important;
+    .stButton>button[data-testid="baseButton-primary"]:hover {
+        background-color: #FF785A !important;
+        box-shadow: 0 0 15px rgba(255, 87, 51, 0.6) !important;
+    }
+
+    /* Tombol Secondary (Inactive) - Outline */
+    .stButton>button[data-testid="baseButton-secondary"] {
+        background-color: transparent !important;
+        color: #FF5733 !important;
+        border: 1px solid #FF5733 !important;
+        border-radius: 12px !important;
+        font-weight: bold !important;
+        width: 100%;
+    }
+
+    .stButton>button[data-testid="baseButton-secondary"]:hover {
+        background-color: rgba(255, 87, 51, 0.1) !important;
+        box-shadow: 0 0 15px rgba(255, 87, 51, 0.4) !important;
     }
     
     /* Box Peringatan / Info / Tiket */
@@ -103,11 +118,6 @@ st.markdown(
         padding: 15px;
         margin-bottom: 15px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    /* Gaya khusus untuk tombol menu navigasi yang aktif / tidak aktif */
-    div.stButtonGroup > button {
-        border: 1px solid rgba(0, 210, 196, 0.3) !important;
     }
     </style>
     """,
@@ -206,9 +216,11 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
 # --- 4. PEMBUATAN MENU NAVIGASI HORIZONTAL DENGAN COLUMNS (100% BEBAS ERROR) ---
 if "menu_aktif" not in st.session_state:
     st.session_state.menu_aktif = "📍 Cari Rute"
+if "riwayat_tiket" not in st.session_state:
+    st.session_state.riwayat_tiket = []
 
-# Membuat 6 kolom baris horizontal untuk tombol menu
-m1, m2, m3, m4, m5, m6 = st.columns(6)
+# Membuat 7 kolom baris horizontal untuk tombol menu
+m1, m2, m3, m4, m5, m6, m7 = st.columns(7)
 
 with m1:
     if st.button("📍 Cari Rute", type="primary" if st.session_state.menu_aktif == "📍 Cari Rute" else "secondary", use_container_width=True):
@@ -234,6 +246,10 @@ with m6:
     if st.button("🗂️ Papan Kartu Info", type="primary" if st.session_state.menu_aktif == "🗂️ Papan Kartu Info" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🗂️ Papan Kartu Info"
         st.rerun()
+with m7:
+    if st.button("🛍️ Penjualan", type="primary" if st.session_state.menu_aktif == "🛍️ Penjualan" else "secondary", use_container_width=True):
+        st.session_state.menu_aktif = "🛍️ Penjualan"
+        st.rerun()
 
 
 # BUNGKUS SELURUH KONTEN DI DALAM KOTAK TRANSPARAN CSS
@@ -257,7 +273,7 @@ if st.session_state.menu_aktif == "📍 Cari Rute":
                 st.error("Maaf, jalur rel antarkota tersebut belum terhubung.")
             else:
                 st.success(f"🏁 Rute Ditemukan! Total Jarak Tempuh: {jarak} KM")
-                st.info(" ➔ ".join([f"**{s}**" for s in jalur]))
+                st.info(" ➔ ".join([f"*{s}*" for s in jalur]))
 
 
 # ==================== MENU 2: ESTIMASI WAKTU PERJALANAN ====================
@@ -282,7 +298,7 @@ elif st.session_state.menu_aktif == "⏱️ Estimasi Waktu":
             else:
                 waktu_hasil = hitung_estimasi_waktu(jarak_est, kecepatan_pilihan)
                 st.metric(label=f"Durasi Perjalanan ({kecepatan_pilihan} km/jam)", value=waktu_hasil)
-                st.write(f"ℹ️ Jarak total yang akan ditempuh melewati rute ini adalah **{jarak_est} KM**.")
+                st.write(f"ℹ️ Jarak total yang akan ditempuh melewati rute ini adalah *{jarak_est} KM*.")
 
 
 # ==================== MENU 3: PESAN TIKET MANDIRI ====================
@@ -307,13 +323,27 @@ elif st.session_state.menu_aktif == "🎫 Pesan Tiket ":
             total_harga = jarak_real * pengali_kelas[kelas_ka]
             estimasi_waktu_tiket = hitung_estimasi_waktu(jarak_real)
             
-            st.markdown(f"### 💰 Estimasi Biaya: **Rp {total_harga:,.0f}**")
+            st.markdown(f"### 💰 Estimasi Biaya: *Rp {total_harga:,.0f}*")
             
             if st.button("Cetak E-Ticket", type="primary", key="btn_tiket"):
                 if not nama_penumpang:
                     st.error("Mohon isi nama penumpang terlebih dahulu!")
                 else:
                     kode_booking = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=6))
+                    
+                    # Simpan ke riwayat tiket
+                    tiket_baru = {
+                        "kode": kode_booking,
+                        "nama": nama_penumpang,
+                        "asal": st_tiket_asal,
+                        "tujuan": st_tiket_tujuan,
+                        "kelas": kelas_ka,
+                        "tanggal": str(tanggal_perjalanan),
+                        "kursi": posisi_kursi,
+                        "harga": total_harga
+                    }
+                    st.session_state.riwayat_tiket.append(tiket_baru)
+                    
                     st.success("Transaksi Berhasil! E-Ticket Anda telah diterbitkan di bawah ini:")
                     
                     st.markdown(
@@ -359,7 +389,7 @@ elif st.session_state.menu_aktif == "🕒 Jadwal Kereta":
         status = random.choice(["ON TIME", "ON TIME", "DELAY 10 MNT", "BOARDING"])
         
         with st.expander(f"⏱️ Jam {jam} — {nama_ka} (Tujuan Akhir: {tujuan_ka})"):
-            st.write(f"Status Keberangkatan: **{status}**")
+            st.write(f"Status Keberangkatan: *{status}*")
             st.write("Silakan bersiap di peron jalur yang sesuai.")
 
 
@@ -405,11 +435,11 @@ elif st.session_state.menu_aktif == "🎰 Live Traffic":
 
     st.write("") 
     if warna_alert == "lancar":
-        st.success(f"🟢 **Status Stasiun {st_pilih_simulasi}:** Saat ini terpantau sangat lancar.")
+        st.success(f"🟢 *Status Stasiun {st_pilih_simulasi}:* Saat ini terpantau sangat lancar.")
     elif warna_alert == "ramai":
-        st.warning(f"🟡 **Perhatian:** Stasiun {st_pilih_simulasi} dalam kondisi cukup padat/ramai.")
+        st.warning(f"🟡 *Perhatian:* Stasiun {st_pilih_simulasi} dalam kondisi cukup padat/ramai.")
     else:
-        st.error(f"🚨 **Peringatan:** Stasiun {st_pilih_simulasi} dalam kondisi sangat padat!")
+        st.error(f"🚨 *Peringatan:* Stasiun {st_pilih_simulasi} dalam kondisi sangat padat!")
     st.write("")
 
     col_s1, col_s2, col_s3 = st.columns(3)
@@ -421,9 +451,9 @@ elif st.session_state.menu_aktif == "🎰 Live Traffic":
         st.metric(label="Jumlah Kereta Bersandar/Antri", value=f"{jumlah_antrean} KA")
         
     st.write("---")
-    st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
+    st.write("*Grafik Batas Kapasitas Area Peron Stasiun:*")
     st.progress(kepadatan_persen / 100)
-    st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
+    st.write(f"Tingkat keterisian area tunggu: *{kepadatan_persen}%*")
     
     st.markdown(
         f"""
@@ -488,6 +518,25 @@ elif st.session_state.menu_aktif == "🗂️ Papan Kartu Info":
 
     if kartu_terbuat == 0:
         st.info("Tidak ada rute rel yang sesuai dengan pilihan Anda.")
+
+# ==================== MENU 7: MENU PENJUALAN (RIWAYAT) ====================
+elif st.session_state.menu_aktif == "🛍️ Penjualan":
+    st.subheader("🛍️ Riwayat Pembelian Tiket")
+    
+    if not st.session_state.riwayat_tiket:
+        st.info("Belum ada tiket yang dibeli pada sesi ini.")
+    else:
+        for i, tiket in enumerate(st.session_state.riwayat_tiket):
+            st.markdown(f"""
+            <div class="ticket-box" style="margin-bottom: 15px;">
+                <h4 style="color: #FF5733; margin-top:0;">E-Ticket #{i+1} - Kode Booking: {tiket['kode']}</h4>
+                <hr style='border-color: rgba(255, 87, 51, 0.3);'>
+                <p><b>Nama Penumpang:</b> {tiket['nama']} | <b>Kelas Kereta:</b> {tiket['kelas']}</p>
+                <p><b>Rute Perjalanan:</b> {tiket['asal']} &rarr; {tiket['tujuan']}</p>
+                <p><b>Tanggal Keberangkatan:</b> {tiket['tanggal']} | <b>Nomor Kursi:</b> {tiket['kursi']}</p>
+                <p style="color: #00D2C4; font-weight: bold; font-size: 18px; margin-top: 10px;">Total Pembayaran: Rp {tiket['harga']:,.0f}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
 # MENUTUP PEMBUNGKUS KOTAK TRANSPARAN CSS
 st.markdown('</div>', unsafe_allow_html=True)
