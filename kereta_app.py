@@ -34,25 +34,6 @@ st.markdown(
         color: #E2E8F0 !important;
     }
 
-    /* Styling Kotak Khusus untuk Judul */
-    .header-box {
-        background-color: rgba(15, 32, 67, 0.75) !important;
-        padding: 25px 35px;
-        border-radius: 20px;
-        border: 2px solid rgba(0, 210, 196, 0.5) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-        margin-bottom: 25px;
-    }
-    .header-box h1 {
-        margin: 0 !important;
-        padding-bottom: 5px !important;
-    }
-    .header-box p {
-        margin: 0 !important;
-        font-size: 16px !important;
-        color: #94A3B8 !important;
-    }
-
     /* Desain Kartu Wadah Konten di Bawah Menu Navigasi (Transparan Gelap & Estetik) */
     .content-container-card {
         background-color: rgba(15, 32, 67, 0.8) !important;
@@ -111,17 +92,6 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_html=True
-)
-
-# --- JALUR JUDUL UTAMA DALAM KOTAK ---
-st.markdown(
-    """
-    <div class="header-box">
-        <h1>🚇 SAS Train Route KA </h1>
-        <p>Sistem Navigasi Jalur Indonesia</p>
-    </div>
-    """, 
     unsafe_allow_html=True
 )
 
