@@ -1,7 +1,6 @@
 import heapq
 import streamlit as st
 import random
-from streamlit_option_menu import option_menu  # Pastikan sudah install: pip install streamlit-option-menu
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
 st.set_page_config(layout="wide", page_title="SAS KERETA API")
@@ -54,14 +53,26 @@ st.markdown(
         color: #94A3B8 !important;
     }
 
-    /* Desain Kartu Wadah Konten di Bawah Menu Navigasi (Transparan Gelap & Estetik) */
-    .content-container-card {
+    /* Desain Kartu pada Tabs (Transparan Gelap & Estetik) */
+    .stTabs [data-baseweb="tab-panel"] {
         background-color: rgba(15, 32, 67, 0.8) !important;
         padding: 30px;
         border-radius: 20px;
         border: 2px solid rgba(0, 210, 196, 0.4) !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-        margin-top: 20px;
+        margin-top: 15px;
+    }
+
+    /* Styling Menu Tab */
+    button[data-baseweb="tab"] {
+        font-size: 16px !important;
+        font-weight: bold !important;
+        color: #94A3B8 !important;
+    }
+    
+    button[aria-selected="true"] {
+        color: #00D2C4 !important;
+        border-bottom-color: #00D2C4 !important;
     }
 
     /* Tombol Utama (Cyan) */
@@ -199,35 +210,19 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
     return waktu_str
 
 
-# --- 4. PEMBUATAN MENU UTAMA HORIZONTAL MODERN MENGGUNAKAN OPTION_MENU ---
-selected_menu = option_menu(
-    menu_title=None,  # Menghilangkan judul header menu agar bersih
-    options=[
-        "Cari Rute", 
-        "Estimasi Waktu", 
-        "Pesan Tiket Mand", 
-        "Jadwal Kereta",
-        "Live Traffic",
-        "Papan Kartu Info"
-    ],
-    icons=["geo-alt", "clock", "ticket-perforated", "calendar3", "activity", "card-heading"],
-    menu_icon="cast",
-    default_index=0,
-    orientation="horizontal",
-    styles={
-        "container": {"padding": "0!important", "background-color": "rgba(15, 32, 67, 0.75)", "border-radius": "12px", "border": "1px solid rgba(0, 210, 196, 0.3)"},
-        "icon": {"color": "#94A3B8", "font-size": "14px"}, 
-        "nav-link": {"font-size": "14px", "text-align": "center", "margin": "0px", "color": "#94A3B8", "font-weight": "bold"},
-        "nav-link-selected": {"background-color": "#00D2C4", "color": "#0B192C"},
-    }
-)
+# --- 4. PEMBUATAN MENU UTAMA (6 TABS) ---
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "📍 Cari Rute ", 
+    "⏱️ Estimasi Waktu", 
+    "🎫 Pesan Tiket Mandiri", 
+    "🕒 Jadwal Kereta",
+    "🎰 Live Traffic Simulator",
+    "🗂️ Papan Kartu Informasi"
+])
 
-
-# BUNGKUS SELURUH KONTEN DI DALAM KOTAK TRANSPARAN CSS
-st.markdown('<div class="content-container-card">', unsafe_allow_html=True)
 
 # ==================== MENU 1: CARI RUTE TERBAIK ====================
-if selected_menu == "Cari Rute":
+with tab1:
     st.subheader("📍 Optimasi Jalur Kereta")
     col_asal, col_tujuan = st.columns(2)
     with col_asal:
@@ -248,7 +243,7 @@ if selected_menu == "Cari Rute":
 
 
 # ==================== MENU 2: ESTIMASI WAKTU PERJALANAN ====================
-elif selected_menu == "Estimasi Waktu":
+with tab2:
     st.subheader("⏱️Estimasi Waktu Perjalanan")
     st.write("berapa lama waktu yang kamu butuhkan berdasarkan kecepatan laju kereta api.")
     
@@ -273,7 +268,7 @@ elif selected_menu == "Estimasi Waktu":
 
 
 # ==================== MENU 3: PESAN TIKET MANDIRI ====================
-elif selected_menu == "Pesan Tiket Mand":
+with tab3:
     st.subheader("🎫 Sistem Booking Tiket Mandiri")
     
     col_p1, col_p2 = st.columns(2)
@@ -327,8 +322,8 @@ elif selected_menu == "Pesan Tiket Mand":
         st.warning("Silakan pilih stasiun asal dan tujuan yang berbeda untuk menghitung tarif tiket.")
 
 
-# ==================== MENU 4: JADWAL KEBERANGKATAN ====================
-elif selected_menu == "Jadwal Kereta":
+# ==================== MENU 4: JADWAL KEBERANGKATAN (VERSI EXPANDER AMAN) ====================
+with tab4:
     st.subheader("🕒 Informasi Jadwal Keberangkatan")
     st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
     
@@ -351,22 +346,28 @@ elif selected_menu == "Jadwal Kereta":
 
 
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
-elif selected_menu == "Live Traffic":
+with tab5:
     st.subheader("🎰 Live Traffic")
     st.write("Memantau status keramaian dan lalu lintas stasiun ")
     
+    # 1. Pilihan Stasiun
     st_pilih_simulasi = st.selectbox("Pilih Stasiun yang Ingin Dipantau:", daftar_stasiun, key="sim_stasiun")
     
+    # 2. PENGUNCIAN STATUS SESUAI REQUEST (4 Kuning, 3 Merah, 6 Hijau)
+    # Total ada 13 stasiun aktif di dalam graph program kita
     status_preset = {
+        # --- 4 STASIUN KUNING (CUKUP PADAT) ---
         "Bandung": {"persen": 65, "penumpang": 1200, "antrean": 4, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
         "Semarang": {"persen": 58, "penumpang": 950, "antrean": 3, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
         "Yogyakarta": {"persen": 70, "penumpang": 1650, "antrean": 5, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
         "Cirebon": {"persen": 50, "penumpang": 780, "antrean": 2, "teks": "🟡 CUKUP PADAT ", "alert": "ramai"},
         
+        # --- 3 STASIUN MERAH (SANGAT PADAT) ---
         "Malang": {"persen": 92, "penumpang": 2100, "antrean": 8, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
         "Jakarta": {"persen": 96, "penumpang": 2450, "antrean": 11, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
         "Surabaya": {"persen": 88, "penumpang": 1980, "antrean": 7, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
         
+        # --- 6 STASIUN HIJAU (SANGAT LANCAR) ---
         "Banyuwangi": {"persen": 25, "penumpang": 220, "antrean": 1, "teks": "🟢 SANGAT LANCAR", "alert": "lancar"},
         "Tangerang": {"persen": 25, "penumpang":230, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
         "Lampung": {"persen": 30, "penumpang": 340, "antrean": 2, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
@@ -375,6 +376,7 @@ elif selected_menu == "Live Traffic":
         "Parepare": {"persen": 18, "penumpang": 140, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"}
     }
     
+    # Ambil data berdasarkan stasiun yang dipilih (jika tidak terdaftar, default ke lancar)
     data_stasiun = status_preset.get(st_pilih_simulasi, {"persen": 30, "penumpang": 300, "antrean": 1, "teks": "🟢 SANGAT LANCAR / SEPI", "alert": "lancar"})
     
     kepadatan_persen = data_stasiun["persen"]
@@ -383,6 +385,7 @@ elif selected_menu == "Live Traffic":
     status_teks = data_stasiun["teks"]
     warna_alert = data_stasiun["alert"]
     
+    # Menentukan teks tips rekomendasi
     if warna_alert == "lancar":
         tips = "Kondisi stasiun sangat kondusif. Waktu yang tepat untuk melakukan boarding tanpa antri."
     elif warna_alert == "ramai":
@@ -390,6 +393,7 @@ elif selected_menu == "Live Traffic":
     else:
         tips = "⚠️ PERINGATAN: Stasiun mengalami lonjakan parah!. Disarankan segera menuju stasiun."
 
+    # 3. SEKAT WARNA DINAMIS (Tepat di antara stasiun dan metrik)
     st.write("") 
     if warna_alert == "lancar":
         st.success(f"🟢 **Status Stasiun {st_pilih_simulasi}:** Saat ini terpantau sangat lancar.")
@@ -399,6 +403,7 @@ elif selected_menu == "Live Traffic":
         st.error(f"🚨 **Peringatan:** Stasiun {st_pilih_simulasi} dalam kondisi sangat padat!")
     st.write("")
 
+    # 4. Hasil Metrik Kepadatan
     col_s1, col_s2, col_s3 = st.columns(3)
     with col_s1:
         st.metric(label="Status Arus Lalu Lintas", value=status_teks)
@@ -412,6 +417,7 @@ elif selected_menu == "Live Traffic":
     st.progress(kepadatan_persen / 100)
     st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
     
+    # 5. Kotak Rekomendasi Detail Akhir
     st.markdown(
         f"""
         <div style="background-color: rgba(15, 32, 67, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 210, 196, 0.3); margin-top: 15px;">
@@ -422,33 +428,40 @@ elif selected_menu == "Live Traffic":
     )
 
 # ==================== MENU 6: PAPAN KARTU INFORMASI RUTE ====================
-elif selected_menu == "Papan Kartu Info":
+with tab6:
     st.subheader("🗂️ Papan Informasi Jaringan Rel")
     st.write("Daftar lengkap seluruh koneksi rel langsung antarkota.")
 
+    # 1. Mengumpulkan Data Koneksi Jalur Kereta secara Manual
     data_j = []
     for s, t_list in graph.edges.items():
         for t, j in t_list:
             if (t, s, j) not in data_j: 
                 data_j.append((s, t, j))
                 
+    # Urutkan rute berdasarkan nama stasiun asal secara alfabetis
     data_j.sort(key=lambda x: x[0])
 
+    # 2. Filter Dropdown Interaktif
     opsi_filter = st.selectbox("Filter Tampilan Berdasarkan Kondisi Jalur:", ["Semua Jalur Kereta", "Hanya Jalur Normal", "Hanya Jalur Perbaikan"])
     st.write("---")
 
+    # 3. Distribusi Kartu ke dalam 3 Kolom Grid agar Seimbang
     col_grid1, col_grid2, col_grid3 = st.columns(3)
     
     kartu_terbuat = 0
     for i, (asal_r, tujuan_r, jarak_r) in enumerate(data_j):
+        # Membuat status tiruan yang konsisten berdasarkan urutan index
         status_kondisi = "✅ JALUR NORMAL" if i % 5 != 0 else "⚠️ DALAM PERBAIKAN"
         warna_status = "#00D2C4" if i % 5 != 0 else "#FF4B4B"
         
+        # Logika sistem filter
         if opsi_filter == "Hanya Jalur Normal" and status_kondisi != "✅ JALUR NORMAL":
             continue
         if opsi_filter == "Hanya Jalur Perbaikan" and status_kondisi != "⚠️ DALAM PERBAIKAN":
             continue
 
+        # Membagi cetakan kartu bergantian ke tiap kolom (Kolom 1, Kolom 2, Kolom 3)
         if kartu_terbuat % 3 == 0:
             target_col = col_grid1
         elif kartu_terbuat % 3 == 1:
@@ -456,6 +469,7 @@ elif selected_menu == "Papan Kartu Info":
         else:
             target_col = col_grid3
             
+        # Cetak komponen visual Kartu Informasi Jalur Kereta (Menggunakan HTML Murni)
         target_col.markdown(
             f"""
             <div class="route-card">
@@ -475,6 +489,3 @@ elif selected_menu == "Papan Kartu Info":
 
     if kartu_terbuat == 0:
         st.info("Tidak ada rute rel yang sesuai dengan pilihan Anda.")
-
-# MENUTUP PEMBUNGKUS KOTAK TRANSPARAN CSS
-st.markdown('</div>', unsafe_allow_html=True)
