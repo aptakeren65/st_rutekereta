@@ -1,6 +1,7 @@
 import heapq
 import streamlit as st
 import random
+from streamlit_option_menu import option_menu  # Pastikan sudah install: pip install streamlit-option-menu
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
 st.set_page_config(layout="wide", page_title="SAS KERETA API")
@@ -32,6 +33,25 @@ st.markdown(
     /* Memaksa Semua Teks Standar Menjadi Terang */
     p, b, span, label, .stWidgetLabel p {
         color: #E2E8F0 !important;
+    }
+
+    /* Styling Kotak Khusus untuk Judul */
+    .header-box {
+        background-color: rgba(15, 32, 67, 0.75) !important;
+        padding: 25px 35px;
+        border-radius: 20px;
+        border: 2px solid rgba(0, 210, 196, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+        margin-bottom: 25px;
+    }
+    .header-box h1 {
+        margin: 0 !important;
+        padding-bottom: 5px !important;
+    }
+    .header-box p {
+        margin: 0 !important;
+        font-size: 16px !important;
+        color: #94A3B8 !important;
     }
 
     /* Desain Kartu Wadah Konten di Bawah Menu Navigasi (Transparan Gelap & Estetik) */
@@ -85,13 +105,19 @@ st.markdown(
         margin-bottom: 15px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-
-    /* Gaya khusus untuk tombol menu navigasi yang aktif / tidak aktif */
-    div.stButtonGroup > button {
-        border: 1px solid rgba(0, 210, 196, 0.3) !important;
-    }
     </style>
     """,
+    unsafe_allow_html=True
+)
+
+# --- JALUR JUDUL UTAMA DALAM KOTAK ---
+st.markdown(
+    """
+    <div class="header-box">
+        <h1>🚇 SAS Train Route KA </h1>
+        <p>Sistem Navigasi Jalur Indonesia</p>
+    </div>
+    """, 
     unsafe_allow_html=True
 )
 
@@ -173,44 +199,35 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
     return waktu_str
 
 
-# --- 4. PEMBUATAN MENU NAVIGASI HORIZONTAL DENGAN COLUMNS ---
-if "menu_aktif" not in st.session_state:
-    st.session_state.menu_aktif = "📍 Cari Rute"
-
-# Membuat 6 kolom baris horizontal untuk tombol menu
-m1, m2, m3, m4, m5, m6 = st.columns(6)
-
-with m1:
-    if st.button("📍 Cari Rute", type="primary" if st.session_state.menu_aktif == "📍 Cari Rute" else "secondary", use_container_width=True):
-        st.session_state.menu_aktif = "📍 Cari Rute"
-        st.rerun()
-with m2:
-    if st.button("⏱️ Estimasi Waktu", type="primary" if st.session_state.menu_aktif == "⏱️ Estimasi Waktu" else "secondary", use_container_width=True):
-        st.session_state.menu_aktif = "⏱️ Estimasi Waktu"
-        st.rerun()
-with m3:
-    if st.button("🎫 Pesan Tiket", type="primary" if st.session_state.menu_aktif == "🎫 Pesan Tiket" else "secondary", use_container_width=True):
-        st.session_state.menu_aktif = "🎫 Pesan Tiket"
-        st.rerun()
-with m4:
-    if st.button("🕒 Jadwal Kereta", type="primary" if st.session_state.menu_aktif == "🕒 Jadwal Kereta" else "secondary", use_container_width=True):
-        st.session_state.menu_aktif = "🕒 Jadwal Kereta"
-        st.rerun()
-with m5:
-    if st.button("🎰 Live Traffic", type="primary" if st.session_state.menu_aktif == "🎰 Live Traffic" else "secondary", use_container_width=True):
-        st.session_state.menu_aktif = "🎰 Live Traffic"
-        st.rerun()
-with m6:
-    if st.button("🗂️ Papan Kartu Info", type="primary" if st.session_state.menu_aktif == "🗂️ Papan Kartu Info" else "secondary", use_container_width=True):
-        st.session_state.menu_aktif = "🗂️ Papan Kartu Info"
-        st.rerun()
+# --- 4. PEMBUATAN MENU UTAMA HORIZONTAL MODERN MENGGUNAKAN OPTION_MENU ---
+selected_menu = option_menu(
+    menu_title=None,  # Menghilangkan judul header menu agar bersih
+    options=[
+        "Cari Rute", 
+        "Estimasi Waktu", 
+        "Pesan Tiket Mand", 
+        "Jadwal Kereta",
+        "Live Traffic",
+        "Papan Kartu Info"
+    ],
+    icons=["geo-alt", "clock", "ticket-perforated", "calendar3", "activity", "card-heading"],
+    menu_icon="cast",
+    default_index=0,
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "0!important", "background-color": "rgba(15, 32, 67, 0.75)", "border-radius": "12px", "border": "1px solid rgba(0, 210, 196, 0.3)"},
+        "icon": {"color": "#94A3B8", "font-size": "14px"}, 
+        "nav-link": {"font-size": "14px", "text-align": "center", "margin": "0px", "color": "#94A3B8", "font-weight": "bold"},
+        "nav-link-selected": {"background-color": "#00D2C4", "color": "#0B192C"},
+    }
+)
 
 
 # BUNGKUS SELURUH KONTEN DI DALAM KOTAK TRANSPARAN CSS
 st.markdown('<div class="content-container-card">', unsafe_allow_html=True)
 
 # ==================== MENU 1: CARI RUTE TERBAIK ====================
-if st.session_state.menu_aktif == "📍 Cari Rute":
+if selected_menu == "Cari Rute":
     st.subheader("📍 Optimasi Jalur Kereta")
     col_asal, col_tujuan = st.columns(2)
     with col_asal:
@@ -231,7 +248,7 @@ if st.session_state.menu_aktif == "📍 Cari Rute":
 
 
 # ==================== MENU 2: ESTIMASI WAKTU PERJALANAN ====================
-elif st.session_state.menu_aktif == "⏱️ Estimasi Waktu":
+elif selected_menu == "Estimasi Waktu":
     st.subheader("⏱️Estimasi Waktu Perjalanan")
     st.write("berapa lama waktu yang kamu butuhkan berdasarkan kecepatan laju kereta api.")
     
@@ -256,8 +273,8 @@ elif st.session_state.menu_aktif == "⏱️ Estimasi Waktu":
 
 
 # ==================== MENU 3: PESAN TIKET MANDIRI ====================
-elif st.session_state.menu_aktif == "🎫 Pesan Tiket":
-    st.subheader("🎫 Sistem Booking Tiket")
+elif selected_menu == "Pesan Tiket Mand":
+    st.subheader("🎫 Sistem Booking Tiket Mandiri")
     
     col_p1, col_p2 = st.columns(2)
     with col_p1:
@@ -311,7 +328,7 @@ elif st.session_state.menu_aktif == "🎫 Pesan Tiket":
 
 
 # ==================== MENU 4: JADWAL KEBERANGKATAN ====================
-elif st.session_state.menu_aktif == "🕒 Jadwal Kereta":
+elif selected_menu == "Jadwal Kereta":
     st.subheader("🕒 Informasi Jadwal Keberangkatan")
     st_pilih_jadwal = st.selectbox("Pilih Stasiun Keberangkatan untuk Melihat Jadwal:", daftar_stasiun, key="jd_stasiun")
     
@@ -334,7 +351,7 @@ elif st.session_state.menu_aktif == "🕒 Jadwal Kereta":
 
 
 # ==================== MENU 5: LIVE TRAFFIC & SIMULATOR KEPADATAN ====================
-elif st.session_state.menu_aktif == "🎰 Live Traffic":
+elif selected_menu == "Live Traffic":
     st.subheader("🎰 Live Traffic")
     st.write("Memantau status keramaian dan lalu lintas stasiun ")
     
@@ -405,7 +422,7 @@ elif st.session_state.menu_aktif == "🎰 Live Traffic":
     )
 
 # ==================== MENU 6: PAPAN KARTU INFORMASI RUTE ====================
-elif st.session_state.menu_aktif == "🗂️ Papan Kartu Info":
+elif selected_menu == "Papan Kartu Info":
     st.subheader("🗂️ Papan Informasi Jaringan Rel")
     st.write("Daftar lengkap seluruh koneksi rel langsung antarkota.")
 
