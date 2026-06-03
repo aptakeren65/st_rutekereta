@@ -286,8 +286,8 @@ elif st.session_state.menu_aktif == "⏱️ Estimasi Waktu":
 
 
 # ==================== MENU 3: PESAN TIKET MANDIRI ====================
-elif st.session_state.menu_aktif == "🎫 Pesan Tiket Mandiri":
-    st.subheader("🎫 Sistem Booking Tiket Mandiri")
+elif st.session_state.menu_aktif == "🎫 Pesan Tiket":
+    st.subheader("🎫 Sistem Booking Tiket ")
     
     col_p1, col_p2 = st.columns(2)
     with col_p1:
