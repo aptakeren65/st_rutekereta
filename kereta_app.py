@@ -219,7 +219,7 @@ with m2:
         st.session_state.menu_aktif = "⏱️ Estimasi Waktu"
         st.rerun()
 with m3:
-    if st.button("🎫 Pesan Tiket Mandiri", type="primary" if st.session_state.menu_aktif == "🎫 Pesan Tiket Mandiri" else "secondary", use_container_width=True):
+    if st.button("🎫 Pesan Tiket ", type="primary" if st.session_state.menu_aktif == "🎫 Pesan Tiket" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🎫 Pesan Tiket Mandiri"
         st.rerun()
 with m4:
