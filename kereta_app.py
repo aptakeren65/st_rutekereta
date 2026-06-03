@@ -248,7 +248,7 @@ if st.session_state.menu_aktif == "📍 Cari Rute":
     with col_tujuan:
         st_tujuan = st.selectbox("Titik Tujuan Akhir:", daftar_stasiun, index=len(daftar_stasiun)-1, key="rute_tujuan")
 
-    if st.button("Mulai Hitung Navigasi", type="primary", key="btn_nav"):
+    if st.button("Mulai Hitung ", type="primary", key="btn_nav"):
         if st_asal == st_tujuan:
             st.warning("Stasiun asal dan tujuan tidak boleh sama!")
         else:
