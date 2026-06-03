@@ -128,7 +128,7 @@ st.markdown(
 
 # --- 2. STRUKTUR DATA GRAPH ---
 class GraphKereta:
-    def _init_(self):
+    def __init__(self):
         self.nodes = set()
         self.edges = {}
 
@@ -257,7 +257,7 @@ if st.session_state.menu_aktif == "📍 Cari Rute":
                 st.error("Maaf, jalur rel antarkota tersebut belum terhubung.")
             else:
                 st.success(f"🏁 Rute Ditemukan! Total Jarak Tempuh: {jarak} KM")
-                st.info(" ➔ ".join([f"*{s}*" for s in jalur]))
+                st.info(" ➔ ".join([f"**{s}**" for s in jalur]))
 
 
 # ==================== MENU 2: ESTIMASI WAKTU PERJALANAN ====================
@@ -282,7 +282,7 @@ elif st.session_state.menu_aktif == "⏱️ Estimasi Waktu":
             else:
                 waktu_hasil = hitung_estimasi_waktu(jarak_est, kecepatan_pilihan)
                 st.metric(label=f"Durasi Perjalanan ({kecepatan_pilihan} km/jam)", value=waktu_hasil)
-                st.write(f"ℹ️ Jarak total yang akan ditempuh melewati rute ini adalah *{jarak_est} KM*.")
+                st.write(f"ℹ️ Jarak total yang akan ditempuh melewati rute ini adalah **{jarak_est} KM**.")
 
 
 # ==================== MENU 3: PESAN TIKET MANDIRI ====================
@@ -307,7 +307,7 @@ elif st.session_state.menu_aktif == "🎫 Pesan Tiket ":
             total_harga = jarak_real * pengali_kelas[kelas_ka]
             estimasi_waktu_tiket = hitung_estimasi_waktu(jarak_real)
             
-            st.markdown(f"### 💰 Estimasi Biaya: *Rp {total_harga:,.0f}*")
+            st.markdown(f"### 💰 Estimasi Biaya: **Rp {total_harga:,.0f}**")
             
             if st.button("Cetak E-Ticket", type="primary", key="btn_tiket"):
                 if not nama_penumpang:
@@ -359,7 +359,7 @@ elif st.session_state.menu_aktif == "🕒 Jadwal Kereta":
         status = random.choice(["ON TIME", "ON TIME", "DELAY 10 MNT", "BOARDING"])
         
         with st.expander(f"⏱️ Jam {jam} — {nama_ka} (Tujuan Akhir: {tujuan_ka})"):
-            st.write(f"Status Keberangkatan: *{status}*")
+            st.write(f"Status Keberangkatan: **{status}**")
             st.write("Silakan bersiap di peron jalur yang sesuai.")
 
 
@@ -405,11 +405,11 @@ elif st.session_state.menu_aktif == "🎰 Live Traffic":
 
     st.write("") 
     if warna_alert == "lancar":
-        st.success(f"🟢 *Status Stasiun {st_pilih_simulasi}:* Saat ini terpantau sangat lancar.")
+        st.success(f"🟢 **Status Stasiun {st_pilih_simulasi}:** Saat ini terpantau sangat lancar.")
     elif warna_alert == "ramai":
-        st.warning(f"🟡 *Perhatian:* Stasiun {st_pilih_simulasi} dalam kondisi cukup padat/ramai.")
+        st.warning(f"🟡 **Perhatian:** Stasiun {st_pilih_simulasi} dalam kondisi cukup padat/ramai.")
     else:
-        st.error(f"🚨 *Peringatan:* Stasiun {st_pilih_simulasi} dalam kondisi sangat padat!")
+        st.error(f"🚨 **Peringatan:** Stasiun {st_pilih_simulasi} dalam kondisi sangat padat!")
     st.write("")
 
     col_s1, col_s2, col_s3 = st.columns(3)
@@ -421,9 +421,9 @@ elif st.session_state.menu_aktif == "🎰 Live Traffic":
         st.metric(label="Jumlah Kereta Bersandar/Antri", value=f"{jumlah_antrean} KA")
         
     st.write("---")
-    st.write("*Grafik Batas Kapasitas Area Peron Stasiun:*")
+    st.write("**Grafik Batas Kapasitas Area Peron Stasiun:**")
     st.progress(kepadatan_persen / 100)
-    st.write(f"Tingkat keterisian area tunggu: *{kepadatan_persen}%*")
+    st.write(f"Tingkat keterisian area tunggu: **{kepadatan_persen}%**")
     
     st.markdown(
         f"""
