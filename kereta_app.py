@@ -663,14 +663,14 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
                 st.rerun()
                 
         st.write("---")
-        st.write("### 🔒 Daftar Seluruh Akun Aplikasi")
+        st.write("### 🔒 Daftar Seluruh Akun ")
         for username, data_akun in list(st.session_state.users_db.items()):
             col_u1, col_u2 = st.columns([3, 1])
             with col_u1:
                 st.write(f"👤 Username: **{username}** | Role Akses: `{data_akun['role']}`")
             with col_u2:
                 # Proteksi agar 3 admin utama tidak bisa saling hapus akun satu sama lain
-                if username in ["aulia", "syauqi", "suci"]:
+                if username in ["suci", "aulia", "syauqi"]:
                     st.write("⚙️ Akun Developer")
                 else:
                     if st.button(f"Hapus Akun {username}", key=f"btn_del_{username}"):
