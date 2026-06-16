@@ -225,7 +225,7 @@ if "users_db" not in st.session_state:
     st.session_state.users_db = {
         "suci": {"password": "admin", "role": "Admin"},
         "aulia": {"password": "admin", "role": "Admin"},
-        "syauqi": {"password": "admin", "role": "Admin"}
+        "syauqi": {"password": "admin", "role": "Admin"},
         "lovsit": {"password": "123", "role": "User"}
     }
 
