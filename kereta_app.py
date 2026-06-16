@@ -647,10 +647,10 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
     
     # TAB 1: Tambah / Hapus Rute Rel Kereta
     with t1:
-        st.write("### ➕ Tambah Rute Baru Kedalam Sistem")
+        st.write("### ➕ Tambah Rute Baru ")
         col_ad1, col_ad2, col_ad3 = st.columns(3)
         with col_ad1: in_asal = st.text_input("Nama Stasiun Keberangkatan Baru:")
-        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Kedatangan Baru:")
+        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Tujuan Baru:")
         with col_ad3: in_jarak = st.number_input("Input Jarak Jalur (KM):", min_value=1, value=50)
         
         if st.button("Simpan Rute Baru Ke Graph", type="primary"):
@@ -662,7 +662,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
                 st.rerun()
                 
         st.write("---")
-        st.write("### 🗑️ Hapus Jalur Rel dari Sistem")
+        st.write("### 🗑️ Hapus Jalur Rel ")
         st_hp_asal = st.selectbox("Pilih Stasiun Asal Jalur Rel:", daftar_stasiun, key="h_asal")
         st_hp_tuj = st.selectbox("Pilih Stasiun Tujuan Jalur Rel:", daftar_stasiun, key="h_tuj")
         if st.button("Bongkar / Hapus Jalur Rel", type="primary"):
@@ -707,7 +707,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
 
     # TAB 3: History Log pencatatan aktivitas Admin
     with t3:
-        st.write("### 📜 Riwayat Modifikasi Data Sistem Admin")
+        st.write("### 📜 Riwayat Modifikasi Data ")
         if not st.session_state.admin_logs:
             st.info("Belum ada tindakan admin apapun yang tercatat pada sesi ini.")
         else:
