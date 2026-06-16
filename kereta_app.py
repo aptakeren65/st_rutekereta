@@ -1,6 +1,7 @@
 import heapq
 import streamlit as st
 import random
+from datetime import datetime # Ditambahkan hanya untuk mengambil waktu log admin
 
 # --- 1. PENGATURAN HALAMAN & CSS THEME ---
 st.set_page_config(layout="wide", page_title="SAS KERETA API")
@@ -153,6 +154,13 @@ class GraphKereta:
             if not any(node == tujuan for node, _ in self.edges[asal]):
                 self.edges[asal].append((tujuan, jarak_km))
                 self.edges[tujuan].append((asal, jarak_km))
+                
+    # PENAMBAHAN FUNGSI BARU (TANPA MENGUBAH YANG LAMA) UNTUK FITUR HAPUS BARANG/RUTE
+    def hapus_rute(self, asal, tujuan):
+        if asal in self.edges:
+            self.edges[asal] = [edge for edge in self.edges[asal] if edge[0] != tujuan]
+        if tujuan in self.edges:
+            self.edges[tujuan] = [edge for edge in self.edges[tujuan] if edge[0] != asal]
 
 # Inisialisasi Data Graph Tetap
 if "graph_kereta" not in st.session_state:
@@ -213,47 +221,115 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
     return waktu_str
 
 
-# --- 4. PEMBUATAN MENU NAVIGASI HORIZONTAL DENGAN COLUMNS (100% BEBAS ERROR) ---
+# ==================== PENAMBAHAN VARIABEL STATE BARU UNTUK LOGIN & LOGS ====================
+if "users_db" not in st.session_state:
+    # Akun default yang dibuat oleh kamu dan Rehan
+    st.session_state.users_db = {
+        "admin_kamu": {"password": "admin", "role": "Admin"},
+        "rehan": {"password": "admin", "role": "Admin"},
+        "user_biasa": {"password": "user123", "role": "User"}
+    }
+
+if "admin_logs" not in st.session_state:
+    st.session_state.admin_logs = []
+
+if "is_logged_in" not in st.session_state:
+    st.session_state.is_logged_in = False
+    st.session_state.current_user = None
+    st.session_state.current_role = None
+
+
+# ==================== LOGIKA PENGECEKAN LOGIN & VALIDASI TENDANG AKUN ====================
+if not st.session_state.is_logged_in:
+    st.markdown('<div class="content-container-card">', unsafe_allow_html=True)
+    st.subheader("🔐 Silakan Login Terlebih Dahulu")
+    user_input = st.text_input("Username:")
+    pass_input = st.text_input("Password:", type="password")
+    
+    if st.button("Masuk Aplikasi", type="primary"):
+        if user_input in st.session_state.users_db:
+            if st.session_state.users_db[user_input]["password"] == pass_input:
+                st.session_state.is_logged_in = True
+                st.session_state.current_user = user_input
+                st.session_state.current_role = st.session_state.users_db[user_input]["role"]
+                st.session_state.menu_aktif = "📍 Cari Rute"
+                st.rerun()
+            else:
+                st.error("Password yang Anda masukkan salah!")
+        else:
+            st.error("Akun Anda tidak ditemukan atau sudah dihapus oleh Admin!")
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
+# VALIDASI: Jika akun yang sedang login dihapus oleh Admin di tab sebelah, otomatis kick out!
+if st.session_state.current_user not in st.session_state.users_db:
+    st.session_state.is_logged_in = False
+    st.session_state.current_user = None
+    st.session_state.current_role = None
+    st.error("Akun Anda telah dihapus oleh Admin (Kamu & Rehan)! Anda tidak dapat lagi mengakses aplikasi ini.")
+    if st.button("Kembali ke Login"):
+        st.rerun()
+    st.stop()
+
+
+# --- 4. PEMBUATAN MENU NAVIGASI HORIZONTAL DENGAN COLUMNS ---
 if "menu_aktif" not in st.session_state:
     st.session_state.menu_aktif = "📍 Cari Rute"
 if "riwayat_tiket" not in st.session_state:
     st.session_state.riwayat_tiket = []
 
-# Membuat 7 kolom baris horizontal untuk tombol menu
-m1, m2, m3, m4, m5, m6, m7 = st.columns(7)
+# Tampilan Menu bertambah 1 kolom (menjadi 8) jika login sebagai Admin
+is_admin = st.session_state.current_role == "Admin"
+jumlah_kolom = 8 if is_admin else 7
+kolom_menu = st.columns(jumlah_kolom)
 
-with m1:
+with kolom_menu[0]:
     if st.button("📍 Cari Rute", type="primary" if st.session_state.menu_aktif == "📍 Cari Rute" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "📍 Cari Rute"
         st.rerun()
-with m2:
+with kolom_menu[1]:
     if st.button("⏱️ Estimasi Waktu", type="primary" if st.session_state.menu_aktif == "⏱️ Estimasi Waktu" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "⏱️ Estimasi Waktu"
         st.rerun()
-with m3:
+with kolom_menu[2]:
     if st.button("🎫 Pesan Tiket ", type="primary" if st.session_state.menu_aktif == "🎫 Pesan Tiket " else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🎫 Pesan Tiket "
         st.rerun()
-with m4:
+with kolom_menu[3]:
     if st.button("🕒 Jadwal Kereta", type="primary" if st.session_state.menu_aktif == "🕒 Jadwal Kereta" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🕒 Jadwal Kereta"
         st.rerun()
-with m5:
+with kolom_menu[4]:
     if st.button("🎰 Live Traffic", type="primary" if st.session_state.menu_aktif == "🎰 Live Traffic" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🎰 Live Traffic"
         st.rerun()
-with m6:
+with kolom_menu[5]:
     if st.button("🗂️ Papan Kartu Info", type="primary" if st.session_state.menu_aktif == "🗂️ Papan Kartu Info" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🗂️ Papan Kartu Info"
         st.rerun()
-with m7:
+with kolom_menu[6]:
     if st.button("🛍️ Penjualan", type="primary" if st.session_state.menu_aktif == "🛍️ Penjualan" else "secondary", use_container_width=True):
         st.session_state.menu_aktif = "🛍️ Penjualan"
         st.rerun()
 
+# Kolom ke-8 murni tombol dinamis tambahan khusus Admin
+if is_admin:
+    with kolom_menu[7]:
+        if st.button("🛠️ Panel Admin", type="primary" if st.session_state.menu_aktif == "🛠️ Panel Admin" else "secondary", use_container_width=True):
+            st.session_state.menu_aktif = "🛠️ Panel Admin"
+            st.rerun()
+
 
 # BUNGKUS SELURUH KONTEN DI DALAM KOTAK TRANSPARAN CSS
 st.markdown('<div class="content-container-card">', unsafe_allow_html=True)
+
+# Tampilkan Status User Aktif di Sidebar
+st.sidebar.markdown(f"### 👤 Logged in as:\n**{st.session_state.current_user}** (`{st.session_state.current_role}`)")
+if st.sidebar.button("🚪 Logout Aplikasi", use_container_width=True):
+    st.session_state.is_logged_in = False
+    st.session_state.current_user = None
+    st.session_state.current_role = None
+    st.rerun()
 
 # ==================== MENU 1: CARI RUTE TERBAIK ====================
 if st.session_state.menu_aktif == "📍 Cari Rute":
@@ -266,7 +342,7 @@ if st.session_state.menu_aktif == "📍 Cari Rute":
 
     if st.button("Mulai Hitung ", type="primary", key="btn_nav"):
         if st_asal == st_tujuan:
-            st.warning("Stasiun asal dan tujuan tidak boleh sama!")
+            st.warning("Stasiun asal and tujuan tidak boleh sama!")
         else:
             jarak, jalur = hitung_dijkstra(st_asal, st_tujuan)
             if jarak == float("inf"):
@@ -507,7 +583,7 @@ elif st.session_state.menu_aktif == "🗂️ Papan Kartu Info":
                 <p style="font-size: 16px; font-weight: bold; margin: 5px 0;">{asal_r} &harr; {tujuan_r}</p>
                 <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
                 <table style="width: 100%; font-size: 13px; color: #94A3B8; border: none;">
-                    <tr><td>📐 Jarak Utama</td><td style="text-align: right; color: #E2E8F0;"><b>{jarak_r} KM</b></td></tr>
+                     Clyde <tr><td>📐 Jarak Utama</td><td style="text-align: right; color: #E2E8F0;"><b>{jarak_r} KM</b></td></tr>
                     <tr><td>⏱️ Waktu Tempuh</td><td style="text-align: right; color: #00D2C4;"><b>{hitung_estimasi_waktu(jarak_r)}</b></td></tr>
                 </table>
             </div>
@@ -537,6 +613,82 @@ elif st.session_state.menu_aktif == "🛍️ Penjualan":
                 <p style="color: #00D2C4; font-weight: bold; font-size: 18px; margin-top: 10px;">Total Pembayaran: Rp {tiket['harga']:,.0f}</p>
             </div>
             """, unsafe_allow_html=True)
+
+
+# ==================== MURNI MENAMBAH MENU 8: KELOLA ADMIN (HANYA MUNCUL JIKA ROLE ADMIN) ====================
+elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
+    st.subheader("🛠️ Panel Kendali Utama Admin (Gw & Rehan)")
+    
+    t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel (Graph Goods)", "👥 Manajemen Akun User", "📜 History Logs Aktivitas"])
+    
+    # TAB 1: Tambah / Hapus Rute Rel Kereta
+    with t1:
+        st.write("### ➕ Tambah Rute Baru Kedalam Sistem")
+        col_ad1, col_ad2, col_ad3 = st.columns(3)
+        with col_ad1: in_asal = st.text_input("Nama Stasiun Keberangkatan Baru:")
+        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Kedatangan Baru:")
+        with col_ad3: in_jarak = st.number_input("Input Jarak Jalur (KM):", min_value=1, value=50)
+        
+        if st.button("Simpan Rute Baru Ke Graph", type="primary"):
+            if in_asal and in_tujuan:
+                graph.tambah_rute(in_asal, in_tujuan, in_jarak)
+                waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} berhasil MENAMBAHKAN rute rel baru: {in_asal} ↔ {in_tujuan} ({in_jarak} KM)")
+                st.success("Rute baru berhasil ditambahkan dinamis ke memori Graph!")
+                st.rerun()
+                
+        st.write("---")
+        st.write("### 🗑️ Hapus Jalur Rel dari Sistem")
+        st_hp_asal = st.selectbox("Pilih Stasiun Asal Jalur Rel:", daftar_stasiun, key="h_asal")
+        st_hp_tuj = st.selectbox("Pilih Stasiun Tujuan Jalur Rel:", daftar_stasiun, key="h_tuj")
+        if st.button("Bongkar / Hapus Jalur Rel", type="primary"):
+            graph.hapus_rute(st_hp_asal, st_hp_tuj)
+            waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} berhasil MENGHAPUS jalur rel: {st_hp_asal} ↔ {st_hp_tuj}")
+            st.success("Jalur rel berhasil dicabut dari sistem data!")
+            st.rerun()
+
+    # TAB 2: Tambah Akun / Hapus Akun User (Bisa menendang user secara real-time)
+    with t2:
+        st.write("### ➕ Daftarkan Akun Akses Baru")
+        reg_user = st.text_input("Buat Username Baru:")
+        reg_pass = st.text_input("Buat Password Baru:", type="password")
+        reg_role = st.selectbox("Pilih Hak Akses Role:", ["User", "Admin"])
+        
+        if st.button("Simpan User Baru", type="primary"):
+            if reg_user and reg_pass:
+                st.session_state.users_db[reg_user] = {"password": reg_pass, "role": reg_role}
+                waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} mendaftarkan akun baru: Username [{reg_user}] dengan Hak Akses [{reg_role}]")
+                st.success(f"Akun [{reg_user}] berhasil terdaftar ke database!")
+                st.rerun()
+                
+        st.write("---")
+        st.write("### 🔒 Daftar Seluruh Akun Aplikasi (Hapus Akun Kapan Saja)")
+        for username, data_akun in list(st.session_state.users_db.items()):
+            col_u1, col_u2 = st.columns([3, 1])
+            with col_u1:
+                st.write(f"👤 Username: **{username}** | Role Akses: `{data_akun['role']}`")
+            with col_u2:
+                # Mencegah admin menghapus akun miliknya sendiri atau akun master
+                if username in ["admin_kamu", "rehan", st.session_state.current_user]:
+                    st.write("⚙️ Akun Developer")
+                else:
+                    if st.button(f"Hapus Akun {username}", key=f"btn_del_{username}"):
+                        del st.session_state.users_db[username]
+                        waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} MENGHAPUS secara permanen akun user: [{username}]")
+                        st.success(f"Akun {username} sukses didelete!")
+                        st.rerun()
+
+    # TAB 3: History Log pencatatan aktivitas Admin
+    with t3:
+        st.write("### 📜 Riwayat Modifikasi Data Sistem Admin")
+        if not st.session_state.admin_logs:
+            st.info("Belum ada tindakan admin apapun yang tercatat pada sesi ini.")
+        else:
+            for log_item in reversed(st.session_state.admin_logs):
+                st.text_area("Log Action:", value=log_item, height=60, disabled=True, label_visibility="collapsed")
 
 # MENUTUP PEMBUNGKUS KOTAK TRANSPARAN CSS
 st.markdown('</div>', unsafe_allow_html=True)
