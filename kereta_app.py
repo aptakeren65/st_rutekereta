@@ -155,7 +155,6 @@ class GraphKereta:
                 self.edges[asal].append((tujuan, jarak_km))
                 self.edges[tujuan].append((asal, jarak_km))
                 
-    # PENAMBAHAN FUNGSI BARU (TANPA MENGUBAH YANG LAMA) UNTUK FITUR HAPUS BARANG/RUTE
     def hapus_rute(self, asal, tujuan):
         if asal in self.edges:
             self.edges[asal] = [edge for edge in self.edges[asal] if edge[0] != tujuan]
@@ -221,12 +220,12 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
     return waktu_str
 
 
-# ==================== PENAMBAHAN VARIABEL STATE BARU UNTUK LOGIN & LOGS ====================
+# ==================== UPDATE DATA USER & PASSWORD BARU (3 ADMIN) ====================
 if "users_db" not in st.session_state:
-    # Akun default yang dibuat oleh kamu dan Rehan
     st.session_state.users_db = {
-        "admin_kamu": {"password": "admin", "role": "Admin"},
-        "rehan": {"password": "admin", "role": "Admin"},
+        "aulia": {"password": "admin", "role": "Admin"},
+        "syauqi": {"password": "admin", "role": "Admin"},
+        "suci": {"password": "admin", "role": "Admin"},
         "user_biasa": {"password": "user123", "role": "User"}
     }
 
@@ -266,7 +265,7 @@ if st.session_state.current_user not in st.session_state.users_db:
     st.session_state.is_logged_in = False
     st.session_state.current_user = None
     st.session_state.current_role = None
-    st.error("Akun Anda telah dihapus oleh Admin (Kamu & Rehan)! Anda tidak dapat lagi mengakses aplikasi ini.")
+    st.error("Akun Anda telah dihapus oleh Admin! Anda tidak dapat lagi mengakses aplikasi ini.")
     if st.button("Kembali ke Login"):
         st.rerun()
     st.stop()
@@ -583,7 +582,7 @@ elif st.session_state.menu_aktif == "🗂️ Papan Kartu Info":
                 <p style="font-size: 16px; font-weight: bold; margin: 5px 0;">{asal_r} &harr; {tujuan_r}</p>
                 <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
                 <table style="width: 100%; font-size: 13px; color: #94A3B8; border: none;">
-                     Clyde <tr><td>📐 Jarak Utama</td><td style="text-align: right; color: #E2E8F0;"><b>{jarak_r} KM</b></td></tr>
+                    <tr><td>📐 Jarak Utama</td><td style="text-align: right; color: #E2E8F0;"><b>{jarak_r} KM</b></td></tr>
                     <tr><td>⏱️ Waktu Tempuh</td><td style="text-align: right; color: #00D2C4;"><b>{hitung_estimasi_waktu(jarak_r)}</b></td></tr>
                 </table>
             </div>
@@ -615,9 +614,9 @@ elif st.session_state.menu_aktif == "🛍️ Penjualan":
             """, unsafe_allow_html=True)
 
 
-# ==================== MURNI MENAMBAH MENU 8: KELOLA ADMIN (HANYA MUNCUL JIKA ROLE ADMIN) ====================
+# ==================== MENU 8: KELOLA ADMIN (3 ADMIN UTAMA) ====================
 elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
-    st.subheader("🛠️ Panel Kendali Utama Admin (Gw & Rehan)")
+    st.subheader("🛠️ Panel Kendali Utama (Aulia, Syauqi, & Suci)")
     
     t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel (Graph Goods)", "👥 Manajemen Akun User", "📜 History Logs Aktivitas"])
     
@@ -648,7 +647,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
             st.success("Jalur rel berhasil dicabut dari sistem data!")
             st.rerun()
 
-    # TAB 2: Tambah Akun / Hapus Akun User (Bisa menendang user secara real-time)
+    # TAB 2: Tambah Akun / Hapus Akun User
     with t2:
         st.write("### ➕ Daftarkan Akun Akses Baru")
         reg_user = st.text_input("Buat Username Baru:")
@@ -664,14 +663,14 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
                 st.rerun()
                 
         st.write("---")
-        st.write("### 🔒 Daftar Seluruh Akun Aplikasi (Hapus Akun Kapan Saja)")
+        st.write("### 🔒 Daftar Seluruh Akun Aplikasi")
         for username, data_akun in list(st.session_state.users_db.items()):
             col_u1, col_u2 = st.columns([3, 1])
             with col_u1:
                 st.write(f"👤 Username: **{username}** | Role Akses: `{data_akun['role']}`")
             with col_u2:
-                # Mencegah admin menghapus akun miliknya sendiri atau akun master
-                if username in ["admin_kamu", "rehan", st.session_state.current_user]:
+                # Proteksi agar 3 admin utama tidak bisa saling hapus akun satu sama lain
+                if username in ["aulia", "syauqi", "suci"]:
                     st.write("⚙️ Akun Developer")
                 else:
                     if st.button(f"Hapus Akun {username}", key=f"btn_del_{username}"):
