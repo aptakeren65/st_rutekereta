@@ -223,10 +223,10 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
 # ==================== DATA USER & PASSWORD BARU (3 ADMIN) ====================
 if "users_db" not in st.session_state:
     st.session_state.users_db = {
-        "aulia": {"password": "admin", "role": "Admin"},
-        "syauqi": {"password": "admin", "role": "Admin"},
         "suci": {"password": "admin", "role": "Admin"},
-        "user_biasa": {"password": "user123", "role": "User"}
+        "aulia": {"password": "admin", "role": "Admin"},
+        "syauqi": {"password": "admin", "role": "Admin"}
+        "lovsit": {"password": "123", "role": "User"}
     }
 
 if "admin_logs" not in st.session_state:
@@ -264,7 +264,7 @@ if not st.session_state.is_logged_in:
             else:
                 st.error("Akun Anda tidak ditemukan atau belum terdaftar!")
                 
-    # --- PROSES REGISTRASI MANDIRI (ORANG ASING/BEBAS) ---
+    # --- PROSES REGISTRASI MANDIRI ---
     with tab_daftar:
         st.subheader("Buat Akun Anda Sendiri")
         st.write("Silakan isi username dan password bebas untuk bisa menggunakan SAS train.")
@@ -280,7 +280,7 @@ if not st.session_state.is_logged_in:
             else:
                 # Daftarkan otomatis sebagai 'User' biasa agar tidak bisa mengacak-acak admin panel
                 st.session_state.users_db[new_user_clean] = {"password": new_pass_input, "role": "User"}
-                st.success(f"🎉 Akun [{new_user_clean}] berhasil dibuat! Silakan pindah ke tab 'Login Aplikasi' untuk masuk.")
+                st.success(f" Akun [{new_user_clean}] berhasil dibuat! Silakan pindah ke tab 'Login Aplikasi' untuk masuk.")
                 
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
