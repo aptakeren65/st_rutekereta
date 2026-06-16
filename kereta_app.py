@@ -616,19 +616,19 @@ elif st.session_state.menu_aktif == "🛍️ Penjualan":
 
 # ==================== MENU 8: KELOLA ADMIN (3 ADMIN UTAMA) ====================
 elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
-    st.subheader("🛠️ Panel Kendali Utama (Aulia, Syauqi, & Suci)")
+    st.subheader("🛠️ Panel Kendali Utama (Suci, Aulia, & Syauqi)")
     
-    t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel (Graph Goods)", "👥 Manajemen Akun User", "📜 History Logs Aktivitas"])
+    t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel ", "👥 Manajemen Akun User", "📜 History Logs Aktivitas"])
     
     # TAB 1: Tambah / Hapus Rute Rel Kereta
     with t1:
         st.write("### ➕ Tambah Rute Baru Kedalam Sistem")
         col_ad1, col_ad2, col_ad3 = st.columns(3)
         with col_ad1: in_asal = st.text_input("Nama Stasiun Keberangkatan Baru:")
-        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Kedatangan Baru:")
+        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Tujuan Baru:")
         with col_ad3: in_jarak = st.number_input("Input Jarak Jalur (KM):", min_value=1, value=50)
         
-        if st.button("Simpan Rute Baru Ke Graph", type="primary"):
+        if st.button("Simpan Rute Baru ", type="primary"):
             if in_asal and in_tujuan:
                 graph.tambah_rute(in_asal, in_tujuan, in_jarak)
                 waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -640,7 +640,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
         st.write("### 🗑️ Hapus Jalur Rel dari Sistem")
         st_hp_asal = st.selectbox("Pilih Stasiun Asal Jalur Rel:", daftar_stasiun, key="h_asal")
         st_hp_tuj = st.selectbox("Pilih Stasiun Tujuan Jalur Rel:", daftar_stasiun, key="h_tuj")
-        if st.button("Bongkar / Hapus Jalur Rel", type="primary"):
+        if st.button("Hapus Jalur Rel", type="primary"):
             graph.hapus_rute(st_hp_asal, st_hp_tuj)
             waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} berhasil MENGHAPUS jalur rel: {st_hp_asal} ↔ {st_hp_tuj}")
