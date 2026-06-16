@@ -242,7 +242,7 @@ if not st.session_state.is_logged_in:
     st.markdown('<div class="content-container-card">', unsafe_allow_html=True)
     
     # Membuat Tab untuk memisahkan menu Login dan Daftar Baru
-    tab_login, tab_daftar = st.tabs(["🔐 Login Aplikasi", "📝 Daftar Akun Baru"])
+    tab_login, tab_daftar = st.tabs(["🔐 Login Aplikasi", "📝 Daftar Akun "])
     
     # --- PROSES LOGIN ---
     with tab_login:
