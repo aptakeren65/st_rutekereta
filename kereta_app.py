@@ -267,9 +267,9 @@ if not st.session_state.is_logged_in:
     # --- PROSES REGISTRASI MANDIRI (ORANG ASING/BEBAS) ---
     with tab_daftar:
         st.subheader("Buat Akun Anda Sendiri")
-        st.write("Silakan isi username dan password bebas untuk bisa menggunakan sistem.")
-        new_user_input = st.text_input("Buat Username Bebas:", key="reg_mandiri_user", placeholder="Contoh: denis")
-        new_pass_input = st.text_input("Buat Password Bebas:", type="password", key="reg_mandiri_pass")
+        st.write("Silakan isi username dan password bebas untuk bisa menggunakan SAS train.")
+        new_user_input = st.text_input("Buat Username :", key="reg_mandiri_user", placeholder="Contoh: celeng")
+        new_pass_input = st.text_input("Buat Password :", type="password", key="reg_mandiri_pass")
         
         if st.button("Daftar Sekarang", type="primary", key="btn_register_submit"):
             new_user_clean = new_user_input.strip()
