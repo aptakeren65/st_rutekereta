@@ -220,7 +220,7 @@ def hitung_estimasi_waktu(jarak_km, kecepatan=80):
     return waktu_str
 
 
-# ==================== UPDATE DATA USER & PASSWORD BARU (3 ADMIN) ====================
+# ==================== DATA USER & PASSWORD BARU (3 ADMIN) ====================
 if "users_db" not in st.session_state:
     st.session_state.users_db = {
         "aulia": {"password": "admin", "role": "Admin"},
@@ -238,25 +238,50 @@ if "is_logged_in" not in st.session_state:
     st.session_state.current_role = None
 
 
-# ==================== LOGIKA PENGECEKAN LOGIN & VALIDASI TENDANG AKUN ====================
+# ==================== LOGIKA PENGECEKAN LOGIN & REGISTRASI MANDIRI ====================
 if not st.session_state.is_logged_in:
     st.markdown('<div class="content-container-card">', unsafe_allow_html=True)
-    st.subheader("🔐 Silakan Login Terlebih Dahulu")
-    user_input = st.text_input("Username:")
-    pass_input = st.text_input("Password:", type="password")
     
-    if st.button("Masuk Aplikasi", type="primary"):
-        if user_input in st.session_state.users_db:
-            if st.session_state.users_db[user_input]["password"] == pass_input:
-                st.session_state.is_logged_in = True
-                st.session_state.current_user = user_input
-                st.session_state.current_role = st.session_state.users_db[user_input]["role"]
-                st.session_state.menu_aktif = "📍 Cari Rute"
-                st.rerun()
+    # Membuat Tab untuk memisahkan menu Login dan Daftar Baru
+    tab_login, tab_daftar = st.tabs(["🔐 Login Aplikasi", "📝 Daftar Akun Baru"])
+    
+    # --- PROSES LOGIN ---
+    with tab_login:
+        st.subheader("Silakan Masuk")
+        user_input = st.text_input("Username:", key="login_user")
+        pass_input = st.text_input("Password:", type="password", key="login_pass")
+        
+        if st.button("Masuk Aplikasi", type="primary", key="btn_login_submit"):
+            if user_input in st.session_state.users_db:
+                if st.session_state.users_db[user_input]["password"] == pass_input:
+                    st.session_state.is_logged_in = True
+                    st.session_state.current_user = user_input
+                    st.session_state.current_role = st.session_state.users_db[user_input]["role"]
+                    st.session_state.menu_aktif = "📍 Cari Rute"
+                    st.rerun()
+                else:
+                    st.error("Password yang Anda masukkan salah!")
             else:
-                st.error("Password yang Anda masukkan salah!")
-        else:
-            st.error("Akun Anda tidak ditemukan atau sudah dihapus oleh Admin!")
+                st.error("Akun Anda tidak ditemukan atau belum terdaftar!")
+                
+    # --- PROSES REGISTRASI MANDIRI (ORANG ASING/BEBAS) ---
+    with tab_daftar:
+        st.subheader("Buat Akun Anda Sendiri")
+        st.write("Silakan isi username dan password bebas untuk bisa menggunakan sistem.")
+        new_user_input = st.text_input("Buat Username Bebas:", key="reg_mandiri_user", placeholder="Contoh: denis")
+        new_pass_input = st.text_input("Buat Password Bebas:", type="password", key="reg_mandiri_pass")
+        
+        if st.button("Daftar Sekarang", type="primary", key="btn_register_submit"):
+            new_user_clean = new_user_input.strip()
+            if not new_user_clean or not new_pass_input:
+                st.error("Username dan Password tidak boleh kosong!")
+            elif new_user_clean in st.session_state.users_db:
+                st.error("Username tersebut sudah terpakai! Silakan gunakan nama lain.")
+            else:
+                # Daftarkan otomatis sebagai 'User' biasa agar tidak bisa mengacak-acak admin panel
+                st.session_state.users_db[new_user_clean] = {"password": new_pass_input, "role": "User"}
+                st.success(f"🎉 Akun [{new_user_clean}] berhasil dibuat! Silakan pindah ke tab 'Login Aplikasi' untuk masuk.")
+                
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
@@ -486,7 +511,7 @@ elif st.session_state.menu_aktif == "🎰 Live Traffic":
         "Surabaya": {"persen": 88, "penumpang": 1980, "antrean": 7, "teks": "🔴 SANGAT PADAT", "alert": "macet"},
         
         "Banyuwangi": {"persen": 25, "penumpang": 220, "antrean": 1, "teks": "🟢 SANGAT LANCAR", "alert": "lancar"},
-        "Tangerang": {"persen": 25, "penumpang":230, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
+        "Tangerang": {"persen": 25, "penumpang": 230, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
         "Lampung": {"persen": 30, "penumpang": 340, "antrean": 2, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
         "Makassar": {"persen": 20, "penumpang": 180, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
         "Palembang": {"persen": 28, "penumpang": 290, "antrean": 1, "teks": "🟢 SANGAT LANCAR ", "alert": "lancar"},
@@ -625,10 +650,10 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
         st.write("### ➕ Tambah Rute Baru Kedalam Sistem")
         col_ad1, col_ad2, col_ad3 = st.columns(3)
         with col_ad1: in_asal = st.text_input("Nama Stasiun Keberangkatan Baru:")
-        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Tujuan Baru:")
+        with col_ad2: in_tujuan = st.text_input("Nama Stasiun Kedatangan Baru:")
         with col_ad3: in_jarak = st.number_input("Input Jarak Jalur (KM):", min_value=1, value=50)
         
-        if st.button("Simpan Rute Baru ", type="primary"):
+        if st.button("Simpan Rute Baru Ke Graph", type="primary"):
             if in_asal and in_tujuan:
                 graph.tambah_rute(in_asal, in_tujuan, in_jarak)
                 waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -640,16 +665,16 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
         st.write("### 🗑️ Hapus Jalur Rel dari Sistem")
         st_hp_asal = st.selectbox("Pilih Stasiun Asal Jalur Rel:", daftar_stasiun, key="h_asal")
         st_hp_tuj = st.selectbox("Pilih Stasiun Tujuan Jalur Rel:", daftar_stasiun, key="h_tuj")
-        if st.button("Hapus Jalur Rel", type="primary"):
+        if st.button("Bongkar / Hapus Jalur Rel", type="primary"):
             graph.hapus_rute(st_hp_asal, st_hp_tuj)
             waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} berhasil MENGHAPUS jalur rel: {st_hp_asal} ↔ {st_hp_tuj}")
             st.success("Jalur rel berhasil dicabut dari sistem data!")
             st.rerun()
 
-    # TAB 2: Tambah Akun / Hapus Akun User
+    # TAB 2: Tambah Akun / Hapus Akun User (Termasuk akun hasil daftar mandiri)
     with t2:
-        st.write("### ➕ Daftarkan Akun Akses Baru")
+        st.write("### ➕ Daftarkan Akun Baru")
         reg_user = st.text_input("Buat Username Baru:")
         reg_pass = st.text_input("Buat Password Baru:", type="password")
         reg_role = st.selectbox("Pilih Hak Akses Role:", ["User", "Admin"])
@@ -663,7 +688,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
                 st.rerun()
                 
         st.write("---")
-        st.write("### 🔒 Daftar Seluruh Akun ")
+        st.write("### 🔒 Daftar Seluruh Akun Aplikasi ")
         for username, data_akun in list(st.session_state.users_db.items()):
             col_u1, col_u2 = st.columns([3, 1])
             with col_u1:
