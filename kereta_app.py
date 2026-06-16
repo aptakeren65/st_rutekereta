@@ -640,7 +640,7 @@ elif st.session_state.menu_aktif == "🛍️ Penjualan":
 
 # ==================== MENU 8: KELOLA ADMIN (3 ADMIN UTAMA) ====================
 elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
-    st.subheader("🛠️ Panel Kendali Utama (Suci, Aulia, & Syauqi)")
+    st.subheader("🛠️ Panel Kendali Utama ")
     
     t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel ", "👥 Manajemen Akun User", "📜 History Logs Aktivitas"])
     
