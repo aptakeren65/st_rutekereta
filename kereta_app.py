@@ -664,7 +664,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
         st.write("### 🗑️ Hapus Jalur Rel ")
         st_hp_asal = st.selectbox("Pilih Stasiun Asal Jalur Rel:", daftar_stasiun, key="h_asal")
         st_hp_tuj = st.selectbox("Pilih Stasiun Tujuan Jalur Rel:", daftar_stasiun, key="h_tuj")
-        if st.button("Bongkar / Hapus Jalur Rel", type="primary"):
+        if st.button("Hapus Jalur Rel", type="primary"):
             graph.hapus_rute(st_hp_asal, st_hp_tuj)
             waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             st.session_state.admin_logs.append(f"[{waktu_log}] Admin {st.session_state.current_user} berhasil MENGHAPUS jalur rel: {st_hp_asal} ↔ {st_hp_tuj}")
