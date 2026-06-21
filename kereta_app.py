@@ -642,7 +642,7 @@ elif st.session_state.menu_aktif == "🛍️ Penjualan":
 elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
     st.subheader("🛠️ Panel Kendali Utama ")
     
-    t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel ", "👥 Manajemen Akun User", "📜 History Logs Aktivitas"])
+    t1, t2, t3 = st.tabs(["📌 Manipulasi Rute Rel ", "👥 Manajemen Akun User", "📜 History Aktivitas"])
     
     # TAB 1: Tambah / Hapus Rute Rel Kereta
     with t1:
@@ -652,7 +652,7 @@ elif st.session_state.menu_aktif == "🛠️ Panel Admin" and is_admin:
         with col_ad2: in_tujuan = st.text_input("Nama Stasiun Tujuan Baru:")
         with col_ad3: in_jarak = st.number_input("Input Jarak Jalur (KM):", min_value=1, value=50)
         
-        if st.button("Simpan Rute Baru Ke Graph", type="primary"):
+        if st.button("Simpan Rute Baru", type="primary"):
             if in_asal and in_tujuan:
                 graph.tambah_rute(in_asal, in_tujuan, in_jarak)
                 waktu_log = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
